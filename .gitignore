@@ -1,0 +1,42 @@
+# Dependencies (root and nested, incl. .agents skills)
+node_modules/
+
+# Build artifacts
+screenshots/
+output.pdf
+*.pdf
+_site/
+
+# Personal working checklist
+TODO.md
+
+# Reference material (kept locally, not part of the slides repo)
+# These contain internal detail (collaborator names, Slack/email threads, ops
+# internals) beyond the public slides — they MUST stay out of this public repo.
+af-agentic-ai-research.md
+nikhef_colloquium_research.md
+nikhef_colloquium_title_abstract.md
+colloquium_revisions_for_agent.md
+talk-notes.md
+af-docs/
+ami-mcp/
+rucio-mcp/
+marketplace/
+jupyter-mcp-server/
+flux_apps/
+elwood/
+shannon/
+
+# Old throughput-computing deck, kept locally as a reference source for
+# recovering citations -- not part of the Nikhef narrative, don't ship it here.
+presentation_throughput.html
+
+# Intermediate per-repo research reports (agent working files; the committed
+# deliverable is mcp-design-talk.md)
+research/
+
+# Generated animation exports (scripts/export-gateway-pulse.js)
+exports/
+
+# OS / editor
+.DS_Store

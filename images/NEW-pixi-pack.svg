@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 286" font-family="Inter, Helvetica, sans-serif" role="img" aria-label="pixi-pack ships a locked environment from the login node to a network-free worker">
+  <defs>
+    <marker id="pa" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#5C0000"/>
+    </marker>
+  </defs>
+
+  <!-- Login / build node -->
+  <rect x="24" y="40" width="282" height="156" rx="11" fill="#FFFFFF" stroke="#2D3748" stroke-width="2"/>
+  <text x="165" y="66" text-anchor="middle" fill="#2D3748" font-size="15" font-weight="700">Login / build node</text>
+  <text x="165" y="84" text-anchor="middle" fill="#6B6B6B" font-size="11.5">has internet, full toolchain</text>
+  <rect x="48" y="100" width="234" height="40" rx="8" fill="#e4f0f1" stroke="#1F6F78" stroke-width="1.2"/>
+  <text x="165" y="125" text-anchor="middle" fill="#1F6F78" font-size="13" font-weight="600">pixi project</text>
+  <rect x="48" y="148" width="234" height="34" rx="8" fill="#FFFFFF" stroke="#1F6F78" stroke-width="1.2"/>
+  <text x="165" y="170" text-anchor="middle" fill="#1F6F78" font-size="12.5" font-weight="600">pixi.lock — digest-pinned</text>
+
+  <!-- arrow: pixi-pack -->
+  <text x="362" y="106" text-anchor="middle" fill="#800000" font-size="13" font-weight="700">pixi-pack</text>
+  <line x1="312" y1="118" x2="406" y2="118" stroke="#5C0000" stroke-width="2.2" marker-end="url(#pa)"/>
+
+  <!-- environment.tar artifact -->
+  <rect x="412" y="74" width="216" height="92" rx="11" fill="#f3e6e6" stroke="#800000" stroke-width="2"/>
+  <text x="520" y="106" text-anchor="middle" fill="#5C0000" font-size="15" font-weight="700">environment.tar</text>
+  <text x="520" y="128" text-anchor="middle" fill="#1A1A1A" font-size="11.5">self-contained · cross-platform</text>
+  <text x="520" y="146" text-anchor="middle" fill="#1A1A1A" font-size="11.5">one locked, verifiable object</text>
+
+  <!-- arrow: ship -->
+  <text x="678" y="106" text-anchor="middle" fill="#800000" font-size="12.5" font-weight="700">ship</text>
+  <text x="678" y="142" text-anchor="middle" fill="#6B6B6B" font-size="10.5">no CVMFS</text>
+  <line x1="634" y1="118" x2="730" y2="118" stroke="#5C0000" stroke-width="2.2" marker-end="url(#pa)"/>
+
+  <!-- Worker node (network-free) -->
+  <rect x="736" y="40" width="300" height="156" rx="11" fill="#FCFBF9" stroke="#1F6F78" stroke-width="2" stroke-dasharray="6 4"/>
+  <text x="886" y="66" text-anchor="middle" fill="#1F6F78" font-size="15" font-weight="700">Worker node</text>
+  <text x="886" y="84" text-anchor="middle" fill="#6B6B6B" font-size="11.5">no public internet · small disk</text>
+  <rect x="760" y="100" width="252" height="40" rx="8" fill="#FFFFFF" stroke="#1F6F78" stroke-width="1.2"/>
+  <text x="886" y="125" text-anchor="middle" fill="#1F6F78" font-size="12.5" font-weight="600">pixi-unpack → activate.sh</text>
+  <text x="886" y="166" text-anchor="middle" fill="#1A1A1A" font-size="12">identical env — no conda, no network</text>
+
+  <!-- bottom banner -->
+  <text x="550" y="232" text-anchor="middle" fill="#5C0000" font-size="13.5" font-weight="600">The exact, locked environment the agent tested — reproduced on a network-free worker.</text>
+</svg>

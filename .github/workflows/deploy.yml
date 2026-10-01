@@ -1,0 +1,67 @@
+name: Deploy slides to GitHub Pages
+
+# Publishes presentation.html (as the site root index.html) + styles.css + images/
+# to GitHub Pages on every push to main. Also attempts a PDF export (best-effort).
+#
+# One-time setup: repo Settings -> Pages -> Source: "GitHub Actions".
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - presentation.html
+      - styles.css
+      - images/**
+      - .github/workflows/deploy.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow one concurrent deployment; don't cancel an in-progress run.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          # The deck is static (reveal.js from CDN) — no build step needed.
+          cp presentation.html _site/index.html
+          cp styles.css _site/styles.css
+          if [ -d images ]; then cp -r images _site/images; fi
+          # Stamp the live build: rewrite the "dev" build-stamp text to "<short-sha> · <date>".
+          # The buildstamp id is on an <a> tag (links to the repo); match ">dev<" after it,
+          # regardless of other attributes in between, so the link attrs aren't touched.
+          STAMP="$(git rev-parse --short HEAD) · $(date -u +%Y-%m-%d)"
+          perl -0pi -e "s/(id=\"buildstamp\"[^>]*>)dev(<)/\${1}${STAMP}\${2}/" _site/index.html
+
+      - name: Build PDF (best-effort)
+        continue-on-error: true
+        run: |
+          npx -y decktape@latest --chrome-arg=--no-sandbox \
+            reveal "file://$PWD/presentation.html?export" _site/slides.pdf
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

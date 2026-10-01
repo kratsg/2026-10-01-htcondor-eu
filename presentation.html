@@ -1,0 +1,692 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agents Need Context, Not Just Models — UH AI Rap Session</title>
+
+<!-- Reveal.js core -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.1/dist/reset.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.1/dist/reveal.css">
+<!-- Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<!-- Custom styles (adapted from the throughput-computing deck's stylesheet) -->
+<link rel="stylesheet" href="styles.css">
+
+<!--
+  "Agents Need Context, Not Just Models" — Giordon Stark's three slides for the UH Physics &
+  Astronomy AI "rap session" (2026-09-24). Cut down from the PyHEP.dev 2026 MCP deck and the
+  Nikhef 2026-07-01 colloquium; the evidence behind every claim is in mcp-design-talk.md.
+  Editing conventions, theme, and the gotchas are in CLAUDE.md.
+-->
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ============================================================ -->
+<!-- UH Physics & Astronomy AI "rap session", 2026-09-24:         -->
+<!-- three slides per speaker (DJ rules). Cut down from the       -->
+<!-- PyHEP.dev deck; the full deck is the source of every claim.  -->
+<!-- ============================================================ -->
+
+<section id="title">
+  <div style="display:grid; grid-template-columns: 1.25fr 0.85fr; gap:40px; align-items:center; width:100%;">
+    <div>
+      <p class="kicker">UH Physics &amp; Astronomy &middot; AI Rap Session &middot; 2026&#8209;09&#8209;24</p>
+      <h1 style="font-size:42pt;">Agents Need Context, Not Just Models</h1>
+      <p class="subtitle">Furnishing context safely at a real analysis facility</p>
+      <p class="byline">Giordon Stark (University&nbsp;of&nbsp;Chicago) &middot; everything shown runs in production on the UChicago ATLAS Analysis Facility</p>
+      <!-- the UChicago seal in the strip is white; the dark card keeps it visible on the off-white page -->
+      <img src="images/logos.png" alt="University of Chicago, MANIAC Lab, Enrico Fermi Institute, IRIS-HEP, CERN" style="max-width:100%; margin-top:32px; background:#333; border-radius:10px; padding:10px 16px; box-sizing:border-box;">
+    </div>
+    <div style="text-align:center;">
+      <!-- title-hero.png is de-ATLAS-branded, generic AI-for-research-computing art -->
+      <img src="images/title-hero.png" alt="Agentic intelligence for research computing" style="max-width:100%; max-height:540px; border-radius:12px; box-shadow:0 8px 28px rgba(92,0,0,0.20);">
+    </div>
+  </div>
+  <div class="footnote">Slides AI-assisted by Claude (Anthropic) &middot; title illustration AI-generated. &middot; <a href="https://indico.phys.hawaii.edu/event/2985/">UH AI Rap Session</a></div>
+  <aside class="notes">
+    Quick intro: I'm a Deaf experimental physicist at the University of Chicago. I build
+    statistical tools like pyhf and the analysis-facility infrastructure ATLAS physics runs on.
+    My take for this rap session: the limiting factor is rarely the model itself. The hard part
+    is giving it reliable, secure access to the tools, data, and domain knowledge we already use.
+    Everything I show runs in production at the UChicago ATLAS Analysis Facility today.
+  </aside>
+</section>
+
+<!-- ============================================================ -->
+<!-- 2. WHAT IS MCP (vertical stack: main + build-one BACKUP)     -->
+
+<!-- BRIDGE: tie in the other rap talks (JFC paper, Kevin Flood, Zepeng Li) -->
+<section id="jfc">
+  <p class="kicker">Picking up the thread</p>
+  <h2>&ldquo;Just furnish context&rdquo; &hellip; <span class="accent">from where?</span></h2>
+  <div class="content" style="justify-content:center; gap:22px;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:18px;">
+      <div class="card">
+        <h3>JFC paper</h3>
+        <p style="font-size:14pt;">Given a dataset, an execution framework, and prior papers, an agent ran a full analysis on open data.</p>
+      </div>
+      <div class="card">
+        <h3>Kevin</h3>
+        <p style="font-size:14pt;">A knowledge worker furnishes grounded context; every action passes an authority gate.</p>
+      </div>
+      <div class="card">
+        <h3>Zepeng</h3>
+        <p style="font-size:14pt;">Models went from failing college physics to handling research tasks.</p>
+      </div>
+    </div>
+    <div class="callout teal">
+      <p style="margin:0;">At a real facility, context lives behind logins: data catalogs, batch, storage, <em>your</em> credentials.
+         How do we furnish it to everyone, <strong>safely</strong>?</p>
+    </div>
+  </div>
+  <div class="footnote">Moreno <em>et al.</em>, <a href="https://arxiv.org/abs/2603.20179">arXiv:2603.20179</a> &middot; K. Flood and Z. Li, earlier in this session</div>
+  <aside class="notes">
+    I want to pick up where the earlier talks left off. The JFC paper, just furnish context:
+    give Claude Code a dataset, an execution framework, and the prior literature, and it gets
+    through a full analysis on open data. Kevin showed a factorized pipeline where a knowledge
+    worker furnishes grounded context, and nothing acts without passing an authority gate.
+    Zepeng showed how fast the models themselves have improved.
+    So I'll take "can it do the analysis" as settled enough, and ask the facility question.
+    On open data on a laptop, furnishing context is easy. At a real facility, the context lives
+    in services behind logins: the dataset catalog, the batch system, storage, and your personal
+    grid credentials. How do we give that to every user's agent without handing the model the
+    keys? That's what the rest of my slides are about.
+  </aside>
+</section>
+
+<!-- THE BIG PICTURE: from prompt to discovery (from the AMG Weekly talk, 2026-09-04) -->
+<section id="prompt">
+  <p class="kicker">The big picture</p>
+  <h2>From <span class="accent">prompt</span> to discovery</h2>
+  <div class="content" style="justify-content:center; gap:10px;">
+    <div style="background:#15171c; color:#e8e8e8; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.25); font-family:var(--font-mono, monospace); padding:16px 22px; position:relative;">
+      <p style="margin:0; font-size:15pt; color:#e8e8e8;"><span style="color:#7fd1b9;">$</span> claude mcp add --transport http atlas-af <span style="border:2px dashed #e06c75; border-radius:40px; padding:2px 10px;">https://mcp.af.uchicago.edu/mcp</span></p>
+    </div>
+    <p class="fragment text-maroon" style="margin:0; text-align:right; font-size:18pt; font-weight:700;"><i class="fa-solid fa-arrow-up"></i> what is needed behind this URL?</p>
+    <p class="text-center" style="margin:0; font-size:20pt; color:var(--teal); font-weight:700;"><i class="fa-solid fa-arrow-down"></i></p>
+    <div style="background:#15171c; color:#e8e8e8; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.25); font-family:var(--font-mono, monospace); padding:16px 22px;">
+      <p style="margin:0 0 8px 0; font-size:12pt; color:#9aa0a6;">Claude Code &middot; any model &middot; any harness</p>
+      <p style="margin:0; font-size:15pt; color:#7ee787;">&rsaquo; Using the atlas-af mcp, let's find a 1 TeV Higgsino in the Run 2 + Run 3 dataset.</p>
+    </div>
+  </div>
+  <div class="footnote">Adapted from &ldquo;Towards Agentic Analysis&rdquo;, ATLAS AMG Weekly, 2026-09-04</div>
+  <aside class="notes">
+    Here's the picture I want in your head. One line: add the facility as an MCP server to your
+    assistant. Then you type a physics prompt, "let's find a one TeV Higgsino in Run 2 plus Run 3."
+    Everything interesting is hidden behind that URL. What has to exist there so that prompt can
+    turn into real work on real data, as you, without the model ever holding your credentials?
+    That's the rest of the talk.
+  </aside>
+</section>
+
+<!-- 1. THE BIG PICTURE: swap the model, context is the job -->
+<section id="arch-swap">
+  <p class="kicker">Where the work is</p>
+  <h2>Swap the model freely; <span class="accent">context</span> makes it useful</h2>
+  <div class="content" style="justify-content:center; gap:22px;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1.25fr; gap:18px; align-items:stretch;">
+      <div class="node slate" style="font-size:16pt; padding:16px;">Model<span class="sub">frontier API &middot; or self-hosted open weights</span></div>
+      <div class="node slate" style="font-size:16pt; padding:16px;">Harness<span class="sub">Claude Code &middot; Codex &middot; Copilot</span></div>
+      <div class="node fill" style="font-size:16pt; padding:16px;">Facility context &amp; tools<span class="sub">data, storage, batch, identity, fits &middot; via MCP servers</span></div>
+    </div>
+    <div class="callout">
+      <p style="margin:0;">The first two churn monthly and are interchangeable. The limiting factor is rarely the model: it's
+         <strong>reliable, secure access</strong> to the tools and data physicists already use.</p>
+    </div>
+    <div class="callout teal">
+      <p style="margin:0;">&ldquo;Where should my job outputs go?&rdquo; A generic model says your home area, and the quota fills in minutes.
+         One that knows the facility says fast local scratch. <strong>Same model, more context.</strong></p>
+    </div>
+  </div>
+  <div class="footnote">Everything here runs in production at the UChicago ATLAS Analysis Facility &middot; <a href="https://mcp-portal.af.uchicago.edu/">mcp-portal.af.uchicago.edu</a></div>
+  <aside class="notes">
+    Hi, I'm Giordon, I build analysis-facility infrastructure at UChicago for ATLAS. Three slides, big picture.
+    The way I think about an agent is three blocks. The model, which you can swap: frontier API or open
+    weights you host yourself. The harness, Claude Code, Codex, Copilot, also swappable. And the third
+    block, the facility's context and tools: where the data lives, how you submit jobs, who you are. That
+    third block is the only durable, tractable piece, and it's the one we control. This is the "just
+    furnish context" point from the paper on the agenda, but in practice furnishing context is an
+    infrastructure problem, not a prompt problem.
+    A concrete example. Ask a generic model where your batch job's outputs should go and it'll say
+    next to the job, your home area, and the big files blow your quota in minutes. A model that knows
+    the facility sends big outputs to fast local scratch and keeps small summaries in the backed-up
+    home. The model didn't get smarter; we gave it context. And the flip side: without context it
+    should stay quiet. Ours once confidently recommended tuning for the wrong filesystem, so our rule
+    is ungrounded means silent.
+  </aside>
+</section>
+
+<!-- WHAT IS MCP (intro, from the PyHEP.dev deck) -->
+<section id="what-is-mcp">
+  <h2>What is the Model Context Protocol?</h2>
+  <div class="content" style="justify-content:center; gap:26px;">
+    <p class="text-lg" style="margin:0;">An open protocol connecting AI assistants (LLMs like Claude or Gemini) to the libraries, databases, and services scientists already use.</p>
+    <div style="display:flex; align-items:center; gap:0;">
+      <div class="node teal" style="flex:1.1;">AI assistant<span class="sub">Claude, Gemini CLI, VS&nbsp;Code, &hellip;</span></div>
+      <div style="flex:0.8; text-align:center;">
+        <p class="mono text-teal" style="margin:0 0 2px 0; font-size:11pt; font-weight:600;">MCP (JSON-RPC)</p>
+        <p class="flow-arrow" style="margin:0;">&#10231;</p>
+      </div>
+      <div class="node" style="flex:1.2;">MCP server<span class="sub">you write this &middot; runs on your laptop or hosted at a facility</span></div>
+      <div style="flex:0.8; text-align:center; padding:0 8px;">
+        <p class="mono text-muted" style="margin:0 0 2px 0; font-size:10pt;">Python &middot; subprocess &middot; REST</p>
+        <p class="flow-arrow" style="margin:0;">&#10231;</p>
+      </div>
+      <div class="node slate" style="flex:1.2;">Existing library or service<span class="sub">rucio.client, pyAMI, HTCondor, &hellip;</span></div>
+    </div>
+    <p class="text-center" style="margin:0;"><span class="tag">tools</span> functions the LLM calls &nbsp;&nbsp;&nbsp;&nbsp;<span class="tag teal">resources</span> data it reads &nbsp;&nbsp;&nbsp;&nbsp;<span class="tag slate">prompts</span> reusable templates</p>
+  </div>
+  <div class="footnote"><a href="https://modelcontextprotocol.io">modelcontextprotocol.io</a> &middot; not prompt engineering, not a custom foundation model</div>
+  <aside class="notes">
+    One minute of level-setting. The Model Context Protocol is an open protocol, originally from
+    Anthropic, now with a public spec and SDKs everywhere. The assistant, whatever it is, Claude,
+    Gemini CLI, an editor, speaks MCP to a server someone writes. That server can run on your laptop
+    or be hosted at a facility, and it talks to what we already have: rucio for datasets, AMI for
+    metadata, HTCondor for batch.
+    In JFC terms, this is a standard way to plug in the "execution framework" and the context, so
+    it works with any model. Tools are the primitive that matters in practice: typed functions the
+    model can call, described by a name, a schema, and a docstring. Not prompt engineering, not a
+    custom model: ordinary interface design for an unusual caller.
+  </aside>
+</section>
+
+
+<!-- FACILITY-NATIVE MCP SERVER: the three requirements (AMG Weekly) -->
+<section id="facility-native">
+  <h2>A <span class="accent">facility-native</span> MCP server must be&hellip;</h2>
+  <div class="content" style="justify-content:center; gap:18px;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:18px;">
+      <div class="card">
+        <h3><i class="fa-solid fa-plug card-icon" style="font-size:15pt;"></i> Convenient</h3>
+        <p style="font-size:14pt;">No extra barriers for analyzers*; self-service access to what the facility already offers.</p>
+      </div>
+      <div class="card">
+        <h3><i class="fa-solid fa-lock card-icon" style="font-size:15pt;"></i> Secure</h3>
+        <p style="font-size:14pt;">Never leak your credentials to the agent; never leak sensitive experiment data**.</p>
+      </div>
+      <div class="card">
+        <h3><i class="fa-solid fa-chart-column card-icon" style="font-size:15pt;"></i> Auditable</h3>
+        <p style="font-size:14pt;">Telemetry on usage: which tools get used, which don't.</p>
+      </div>
+    </div>
+    <p class="text-muted" style="font-size:12.5pt; margin:0;">*apart from having your own LLM assistant &nbsp;&middot;&nbsp; **depends on the experiment&rsquo;s guidance</p>
+  </div>
+  <div class="footnote">&ldquo;Towards Agentic Analysis&rdquo;, ATLAS AMG Weekly, 2026-09-04</div>
+  <aside class="notes">
+    So what does "behind the URL" need? Three requirements. Convenient: an analyzer shouldn't need
+    anything beyond their own assistant, and access should be self-service to things the facility
+    already provides. Secure: your credentials never reach the agent, and sensitive experiment data
+    doesn't leak, where "sensitive" is whatever your experiment's guidance says. And auditable:
+    we want telemetry on which tools actually get used, both for security and to know what to build.
+  </aside>
+</section>
+
+<!-- 2. THE MCP PLATFORM: one gateway, many MCP servers -->
+
+<section id="trace">
+  <h2>The MCP Platform: <span class="accent">one gateway</span>, many MCP servers</h2>
+  <div class="content">
+    <div style="display:grid; grid-template-columns:1.22fr 0.78fr; gap:18px; align-items:stretch;">
+      <div class="pdiag-panel">
+        <p class="pdiag-url">mcp-portal.af.uchicago.edu &middot; live</p>
+        <div class="pdiag" id="pdiag" aria-label="How AI assistants reach the facility: an AI assistant speaks MCP to the MCP Gateway (auth, policy, audit, broker), which fans out to Rucio, HTCondor, Jupyter and storage. An animated pulse replays two authorized tool calls and one denied at policy.">
+          <div class="d-node d-client" data-pnode="client">AI Assistant
+            <span class="d-icon" aria-hidden="true"><span class="d-spin"></span><svg class="d-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="d-x" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 6l12 12M18 6L6 18" stroke-width="3" stroke-linecap="round"/></svg></span>
+          </div>
+          <div class="d-link" aria-hidden="true"><span class="d-linklabel">MCP</span></div>
+          <div class="d-node d-gateway" data-pnode="gateway">
+            <span class="d-gwname">MCP Gateway</span>
+            <div class="d-tags">
+              <span class="d-tag" data-gtag="auth">Auth <span class="d-icon" aria-hidden="true"><span class="d-spin"></span><svg class="d-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="d-x" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 6l12 12M18 6L6 18" stroke-width="3" stroke-linecap="round"/></svg></span></span>
+              <span class="d-tag" data-gtag="policy">Policy <span class="d-icon" aria-hidden="true"><span class="d-spin"></span><svg class="d-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="d-x" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 6l12 12M18 6L6 18" stroke-width="3" stroke-linecap="round"/></svg></span></span>
+              <span class="d-tag" data-gtag="audit">Audit <span class="d-icon" aria-hidden="true"><span class="d-spin"></span><svg class="d-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="d-x" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 6l12 12M18 6L6 18" stroke-width="3" stroke-linecap="round"/></svg></span></span>
+              <span class="d-tag" data-gtag="broker">Broker <span class="d-icon" aria-hidden="true"><span class="d-spin"></span><svg class="d-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="d-x" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 6l12 12M18 6L6 18" stroke-width="3" stroke-linecap="round"/></svg></span></span>
+            </div>
+          </div>
+          <div class="d-stem" aria-hidden="true"></div>
+          <div class="d-fanout">
+            <div class="d-branch" data-pnode="rucio">Rucio <span class="d-icon" aria-hidden="true"><span class="d-spin"></span><svg class="d-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="d-x" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 6l12 12M18 6L6 18" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+            <div class="d-branch" data-pnode="htcondor">HTCondor <span class="d-icon" aria-hidden="true"><span class="d-spin"></span><svg class="d-check" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M5 13l4 4L19 7" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><svg class="d-x" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 6l12 12M18 6L6 18" stroke-width="3" stroke-linecap="round"/></svg></span></div>
+            <div class="d-branch">Jupyter <span class="d-icon" aria-hidden="true"><span class="d-spin"></span></span></div>
+            <div class="d-branch">Storage <span class="d-icon" aria-hidden="true"><span class="d-spin"></span></span></div>
+          </div>
+          <div class="d-pulse" data-pulse-dot aria-hidden="true"></div>
+          <div class="d-node d-cred" data-pnode="credential" aria-hidden="true"><span data-cred-label>x509</span></div>
+          <div class="d-chat" aria-hidden="true">
+            <div class="d-chatline" data-chat-line="0"><span class="d-chatrole">user</span><span class="d-chattext" data-chat-text></span></div>
+            <div class="d-chatline" data-chat-line="1"><span class="d-chatrole">ai</span><span class="d-chattext" data-chat-text></span></div>
+            <div class="d-chatline" data-chat-line="2"><span class="d-chatrole">ai</span><span class="d-chattext" data-chat-text></span></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:10px; justify-content:center;">
+        <div class="card teal"><h3 style="font-size:13pt;"><i class="fa-solid fa-shield-halved"></i> Credentials stay behind the broker</h3>
+          <p style="font-size:11pt;">The assistant never holds a raw credential; the user's token is never forwarded.</p></div>
+        <div class="card teal"><h3 style="font-size:13pt;"><i class="fa-solid fa-list-check"></i> Authorize every call</h3>
+          <p style="font-size:11pt;">Group-based access; denials audited too.</p></div>
+        <div class="card teal"><h3 style="font-size:13pt;"><i class="fa-solid fa-clock"></i> Short-lived, scoped</h3>
+          <p style="font-size:11pt;">Minted per service, cached at the broker, reused until expiry; the per-call copy is deleted after use.</p></div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:18px;">
+      <p style="margin:0;">The agent speaks <strong>intent</strong> ("get this dataset", "run on the cluster"); the facility wires the backend.
+         Adding the Nth MCP server is <strong>config</strong>, never a change to the server itself.</p>
+    </div>
+  </div>
+  <div class="footnote"><a href="https://mcp-portal.af.uchicago.edu/">mcp-portal.af.uchicago.edu</a> &middot; the portal landing page's own animation (<a href="https://github.com/maniaclab/af-mcp-platform">af-mcp-platform</a>).</div>
+  <aside class="notes">
+    This is the platform in one animated call: the portal landing page's own diagram, reproduced
+    in the slide. Let it run one cycle while talking. Two authorized calls play through: the
+    assistant asks, Auth, Policy, and Audit check green, the Broker mints a credential off to
+    the side, the call lands on Rucio or HTCondor, and the answer comes back. The third cycle is
+    the governance story in eight seconds: "Delete my /data datasets" passes Auth, fails Policy,
+    the gateway buzzes red, and the assistant reports it is not authorized.
+    Three things to say over it: credentials stay behind the broker, so the assistant never
+    holds anything raw and the user's token is never forwarded downstream. Every call is
+    authorized against group-based permissions, and the denials get audited too. And every
+    credential is minted short-lived for exactly one service, used once, and deleted.
+    And the design idea underneath, which I showed at Nikhef: the agent speaks intent, "get this
+    dataset", "run this on the cluster", and the facility wires that to Rucio, HTCondor, whatever
+    the backend is. Adding the next MCP server is configuration, never a change to the server.
+  </aside>
+</section>
+
+<!-- BEHIND THE GATEWAY: what the platform aggregates (AMG Weekly slides 5-6) -->
+<section id="behind-gateway">
+  <h2>What sits <span class="accent">behind</span> the gateway</h2>
+  <div class="content" style="justify-content:center; gap:16px;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:18px;">
+      <div class="card">
+        <h3 style="font-size:15pt;">MCP servers I built</h3>
+        <ul style="font-size:13pt;">
+          <li><a href="https://github.com/kratsg/rucio-mcp"><strong>rucio</strong></a>: find datasets, replicas, transfers</li>
+          <li><a href="https://github.com/kratsg/ami-mcp"><strong>ami</strong></a>: sample discovery, cross sections</li>
+          <li><a href="https://github.com/maniaclab/af-filesystem-mcp"><strong>filesystem</strong></a>: read your own files</li>
+          <li><a href="https://github.com/maniaclab/af-jupyterlab-mcp"><strong>jupyterlab</strong></a>: run notebooks</li>
+        </ul>
+      </div>
+      <div class="card teal">
+        <h3 style="font-size:15pt;">Identity brokering</h3>
+        <ul style="font-size:13pt;">
+          <li><strong>af-credentials</strong>: redeem against the facility's identity broker</li>
+          <li>Mint a <strong>Kerberos</strong> ticket, <strong>VOMS</strong> proxy, or <strong>HTCondor</strong> token, per user, short-lived</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="font-size:15pt;">Others' servers</h3>
+        <ul style="font-size:13pt;">
+          <li>B. Bockelman: <a href="https://github.com/bbockelm/golang-htcondor"><strong>HTCondor</strong></a></li>
+          <li>T. Maeno: <strong>PanDA</strong>*</li>
+          <li>J. Oliver: <a href="https://gitlab.cern.ch/atlas-search/mcp"><strong>atlas-search</strong></a>*</li>
+        </ul>
+        <p class="text-muted" style="font-size:11pt; margin:4px 0 0 0;">*integration forthcoming</p>
+      </div>
+    </div>
+    <div class="callout">
+      <p style="margin:0;">Anyone's MCP server can plug in. The platform handles identity; the server just does its job.</p>
+    </div>
+  </div>
+  <div class="footnote"><a href="https://mcp-portal.af.uchicago.edu/">mcp-portal.af.uchicago.edu</a> &middot; <a href="https://github.com/maniaclab/af-mcp-platform">af-mcp-platform</a></div>
+  <aside class="notes">
+    Concretely, what's behind it today. Four MCP servers I wrote: rucio for dataset discovery and
+    replicas, AMI for sample metadata and cross sections, a filesystem server that reads only your
+    own files, and a JupyterLab server that manages your notebooks and runs code. Then the part
+    nobody sees: identity brokering. You authenticate once against the facility's identity broker,
+    and small token services mint a Kerberos ticket, a VOMS proxy, or an HTCondor token for you,
+    short-lived, per call. And servers other people wrote plug in the same way: Brian Bockelman's
+    HTCondor server, with Tadashi Maeno's PanDA and Jason Oliver's atlas-search integrations coming.
+  </aside>
+</section>
+
+<!-- CAPABILITIES AND KNOWLEDGE: MCP = hands, skills = expertise (AMG Weekly slide 7) -->
+<section id="capabilities">
+  <h2>Capabilities <span class="accent">and</span> knowledge</h2>
+  <div class="content" style="justify-content:center; gap:18px;">
+    <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:22px; align-items:stretch;">
+      <div class="card">
+        <h3><i class="fa-solid fa-hand card-icon" style="font-size:15pt;"></i> MCP: arms and hands</h3>
+        <p style="font-size:14pt;">The facility lets my agent <strong>do things</strong> and <strong>learn things</strong>:</p>
+        <ul style="font-size:13pt;">
+          <li>find datasets and metadata</li>
+          <li>submit and watch batch jobs</li>
+          <li>read my files, run my notebooks</li>
+        </ul>
+      </div>
+      <div class="card teal">
+        <h3><i class="fa-solid fa-brain card-icon" style="font-size:15pt;"></i> Skills: domain expertise</h3>
+        <p style="font-size:14pt;">The <a href="https://github.com/usatlas/marketplace">USATLAS marketplace</a> gives it know-how:</p>
+        <ul style="font-size:13pt;">
+          <li><strong>af-bnl</strong>, <strong>af-uchicago</strong>: how each facility works</li>
+          <li><strong>atlas</strong>: Rucio, AMI, Open Data, pyhf, cabinetry, HistFitter, ServiceX, &hellip;</li>
+          <li><strong>hep-python-tools</strong>: generic HEP Python tooling</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footnote">&ldquo;Towards Agentic Analysis&rdquo;, ATLAS AMG Weekly, 2026-09-04 &middot; <a href="https://github.com/usatlas/marketplace">github.com/usatlas/marketplace</a></div>
+  <aside class="notes">
+    Two halves of furnishing context. MCP servers give the agent arms and hands: it can do things,
+    submit jobs, find datasets, and learn things about your files and the facility. Skills give it
+    expertise: the USATLAS marketplace has skills for how the BNL and UChicago facilities work, for
+    the ATLAS toolchain from Rucio and AMI through pyhf, cabinetry and HistFitter, and for generic
+    HEP Python. That's the "how a physicist would do it" layer the JFC paper shows matters.
+  </aside>
+</section>
+
+<!-- CURATION: CLARIPHY awesome-hep-agentic-analysis -->
+<section id="clariphy">
+  <p class="kicker">Community &middot; CLARIPHY</p>
+  <h2>Where do I <span class="accent">find</span> all this?</h2>
+  <div class="content" style="justify-content:center; gap:18px;">
+    <p class="text-lg" style="margin:0;"><a href="https://github.com/clariphy/awesome-hep-agentic-analysis"><strong>awesome-hep-agentic-analysis</strong></a>: one curated index of HEP agentic tooling, for any harness.</p>
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:18px;">
+      <div class="card"><h3 style="font-size:15pt;">What's listed</h3>
+        <p style="font-size:13.5pt;">JFC, plugin marketplaces, MCP servers (Rucio, HTCondor, ServiceX, &hellip;), knowledge assistants</p></div>
+      <div class="card"><h3 style="font-size:15pt;">The bar</h3>
+        <p style="font-size:13.5pt;">HEP-specific, <strong>first-hand</strong> (you use or maintain it), usable today</p></div>
+      <div class="card teal"><h3 style="font-size:15pt;">Agent-readable</h3>
+        <p style="font-size:13.5pt;">Datacard per entry + <code>llms.txt</code>, so your agent can search it too</p></div>
+    </div>
+    <div class="callout teal">
+      <p style="margin:0;">Came out of the CLARIPHY Agentic Workflows breakout (Madison, Sept 2026). <strong>Contributions welcome.</strong></p>
+    </div>
+  </div>
+  <div class="footnote"><a href="https://github.com/clariphy/awesome-hep-agentic-analysis">github.com/clariphy/awesome-hep-agentic-analysis</a> &middot; <a href="https://indico.global/event/18639/">CLARIPHY meeting</a> &middot; whitepaper <a href="https://arxiv.org/abs/2602.17582">arXiv:2602.17582</a></div>
+  <aside class="notes">
+    A practical question I kept hearing: where do I even find these tools? At the CLARIPHY AI
+    collaboration meeting in Madison last week, the agentic-workflows breakout reviewed a scattered
+    set of tools, JFC, the IRIS-HEP and USATLAS marketplaces, HTCondor and Rucio MCP, and one concrete
+    outcome was a single curated index. The bar is that it's HEP-specific, first-hand, meaning the
+    person adding it actually uses or maintains it, and usable today. Every entry has a datacard, and
+    there's an llms.txt, so you can point your own agent at the list. Please add your tools.
+  </aside>
+</section>
+
+<!-- 3. SECURITY BY ARCHITECTURE, AGENTS BY DESIGN -->
+<section id="design">
+  <h2>Secure the <span class="accent">architecture</span>, design the <span class="accent">interface</span></h2>
+  <div class="content" style="gap:18px; justify-content:center;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:22px;">
+      <div class="card">
+        <h3><i class="fa-solid fa-shield-halved card-icon" style="font-size:15pt;"></i> Security is structural</h3>
+        <ul>
+          <li><strong>No tool takes a username</strong>: identity comes from the verified token, never the LLM</li>
+          <li><strong>No credentials in the MCP</strong>: vault &rarr; mint per call &rarr; use once &rarr; delete</li>
+          <li><strong>Permissions decided once</strong>, at the gateway; new tools are opt-in</li>
+        </ul>
+      </div>
+      <div class="card teal">
+        <h3><i class="fa-solid fa-user-graduate card-icon" style="font-size:15pt;"></i> Treat the agent like a new student</h3>
+        <ul>
+          <li><strong>Clear, narrow tasks</strong>: "find this dataset", not a raw API</li>
+          <li><strong>A correct manual</strong>: it copies examples verbatim, so test them</li>
+          <li><strong>Useful feedback</strong>: short answers; errors that say what to try next</li>
+        </ul>
+      </div>
+    </div>
+    <blockquote style="font-size:22pt; margin-top:4px;">Interoperable tool interfaces are likely to matter more than model-specific integrations.</blockquote>
+  </div>
+  <div class="footnote">Giordon Stark &middot; kratsg &middot; details + ~40 "tried X, found Y" lessons: <a href="https://github.com/kratsg/2026-09-08-pyhepdev-mcp/blob/main/mcp-design-talk.md">mcp-design-talk.md</a> &middot; slides AI-assisted by Claude (Anthropic).</div>
+  <aside class="notes">
+    Security, saved for the end as requested. The key idea: don't ask the model to be
+    trustworthy, make the architecture not care. No tool in our fleet takes a username, so the schema
+    literally can't express "read Bob's files"; who you are comes from the verified identity on every
+    call. No MCP server holds a credential: the broker pulls from a vault, mints something short-lived
+    for exactly one service, it's used once and deleted. And permissions are decided in exactly one
+    place, the gateway, from plain group-based RBAC. A brand new tool stays off until an operator maps it.
+    The other half is agent design, and the best mental model I have is a new grad student. Give it
+    clear, narrow tasks shaped like how a physicist asks, "find this dataset", rather than a raw API
+    dump. Give it a correct manual: the tool descriptions are what it reads, and ours once copied a
+    broken example verbatim, so now we test every example against the live service. And give it
+    useful feedback: keep answers short, since raw API rows swamped the model, and make every error
+    say what to try next so it can recover on its own.
+    Close: interoperable tool interfaces will matter more than model-specific integrations. Design the
+    interface for the model, design the architecture for the credential.
+  </aside>
+</section>
+
+</div>
+</div>
+
+<!-- Build stamp: deploy.yml rewrites the inner text to "<short-sha> · <date>" at publish time;
+     stays "dev" for local viewing. Top-right, links to the repo; slide number is bottom-left. -->
+<div class="build-stamp"><a href="https://github.com/kratsg/2026-09-24-uhawaii-colloquium-rap" id="buildstamp" target="_blank" rel="noopener">dev</a></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.1/dist/reveal.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.1/dist/plugin/notes.js"></script>
+<script>
+Reveal.initialize({
+  width: 1280,
+  height: 720,
+  margin: 0,
+  controls: true,
+  progress: true,
+  slideNumber: 'c/t',
+  hash: true,
+  transition: 'slide',
+  center: false,
+  plugins: [ RevealNotes ]
+});
+</script>
+<script>
+/* The proof-gateway slide's "gateway pulse" — a faithful vanilla-JS port of the
+   mcp-portal.af.uchicago.edu landing page's one motion moment (af-mcp-platform:
+   portal/src/lib/gatewayPulse.ts). Three scripted cycles on loop: two authorized
+   tool calls (Rucio, HTCondor) and one denied at Policy. Plays only while the
+   slide is on screen (Reveal events stand in for the portal's ScrollTrigger);
+   skipped under prefers-reduced-motion or if GSAP failed to load — the static
+   diagram is complete without it, exactly as on the portal. */
+(function () {
+  if (typeof gsap === 'undefined') return;
+  if (/[?&]export/.test(window.location.search)) return; /* decktape/PDF export: keep the static diagram */
+  if (!window.matchMedia('(prefers-reduced-motion: no-preference)').matches) return;
+  var root = document.getElementById('pdiag');
+  if (!root) return;
+
+  var CYCLES = [
+    { user: 'find me a dataset', call: 'tool_call(rucio_list_dsids)', result: 'Found 3 datasets...',
+      tags: { auth: 'ok', policy: 'ok', audit: 'ok' }, cred: 'x509', target: 'rucio' },
+    { user: 'launch a batch job', call: 'tool_call(condor_submit_job)', result: 'Launched job 293813.0',
+      tags: { auth: 'ok', policy: 'ok', audit: 'ok' }, cred: 'condor-token', target: 'htcondor' },
+    { user: 'Delete my /data datasets', call: 'tool_call(fs_delete_dir)', result: 'I am not authorized...',
+      tags: { auth: 'ok', policy: 'fail', audit: 'fail' }, cred: null, target: null }
+  ];
+
+  var T = { chatReveal: 0.3, chatHoldShort: 0.55, chatHoldFinal: 1.9, chatCollapse: 0.4,
+    thinkHold: 0.8, clearOffset: 0.12, dotFade: 0.15, travelShort: 0.3, travelMed: 0.4,
+    travelLong: 0.55, settleGap: 0.1, tagCheck: 0.22, tagResolveHold: 0.18, deniedGap: 0.55,
+    brokerCheckDelay: 0.15, credentialAppear: 0.2, credHold: 0.35, credentialVanish: 0.3,
+    targetCheckHold: 0.3, arrivalHold: 0.45 };
+
+  function q(sel) { return root.querySelector(sel); }
+  var refs = {
+    client: q('[data-pnode="client"]'), gateway: q('[data-pnode="gateway"]'),
+    fanout: q('.d-fanout'), credential: q('[data-pnode="credential"]'),
+    credLabel: q('[data-cred-label]'), dot: q('[data-pulse-dot]'),
+    tags: { auth: q('[data-gtag="auth"]'), policy: q('[data-gtag="policy"]'),
+      audit: q('[data-gtag="audit"]'), broker: q('[data-gtag="broker"]') },
+    leaves: { rucio: q('[data-pnode="rucio"]'), htcondor: q('[data-pnode="htcondor"]') },
+    chat: Array.prototype.map.call(root.querySelectorAll('[data-chat-line]'), function (w) {
+      return { wrap: w, text: w.querySelector('[data-chat-text]') };
+    })
+  };
+
+  /* Reveal scales the whole deck with a CSS transform, so rect deltas (screen px)
+     must be divided by Reveal.getScale() before use as GSAP x/y (local px). All
+     positions are read fresh at tween start, so window resizes between loops are
+     picked up automatically — same trick as the portal's original. */
+  function scale() { return (window.Reveal && Reveal.getScale && Reveal.getScale()) || 1; }
+  function rect() { return root.getBoundingClientRect(); }
+  function cx(el, c) { var r = el.getBoundingClientRect(); return (r.left + r.width / 2 - c.left) / scale(); }
+  function cy(el, c) { var r = el.getBoundingClientRect(); return (r.top + r.height / 2 - c.top) / scale(); }
+  function ty(el, c) { return (el.getBoundingClientRect().top - c.top) / scale(); }
+  function by(el, c) { return (el.getBoundingClientRect().bottom - c.top) / scale(); }
+  function lx(el, c) { return (el.getBoundingClientRect().left - c.left) / scale(); }
+  function rx(el, c) { return (el.getBoundingClientRect().right - c.left) / scale(); }
+  function setState(el, s) { if (s) { el.dataset.state = s; } else { delete el.dataset.state; } }
+
+  function Seq(tl) { this.tl = tl; this.t = 0; }
+  Seq.prototype.mark = function (fn) { this.tl.call(fn, null, this.t); return this; };
+  Seq.prototype.markAt = function (fn, off) { this.tl.call(fn, null, this.t + off); return this; };
+  Seq.prototype.wait = function (d) { this.t += d; return this; };
+  Seq.prototype.tween = function (tg, vars, d) { vars.duration = d; this.tl.to(tg, vars, this.t); this.t += d; return this; };
+  Seq.prototype.tweenC = function (tg, vars, d) { vars.duration = d; this.tl.to(tg, vars, this.t); return this; };
+  Seq.prototype.moveTo = function (el, vars, d) { vars.ease = 'power1.inOut'; return this.tween(el, vars, d); };
+  Seq.prototype.appear = function (el, x, y) { this.mark(function () { gsap.set(el, { x: x, y: y }); }); return this.tween(el, { opacity: 1 }, T.dotFade); };
+  Seq.prototype.vanish = function (el) { return this.tween(el, { opacity: 0 }, T.dotFade); };
+  Seq.prototype.checkTag = function (el, outcome) {
+    return this.mark(function () { setState(el, 'checking'); }).wait(T.tagCheck)
+      .mark(function () { setState(el, outcome); }).wait(T.tagResolveHold);
+  };
+
+  function buildCycle(cycle) {
+    var tl = gsap.timeline();
+    var seq = new Seq(tl);
+    var client = refs.client, gateway = refs.gateway, fanout = refs.fanout,
+      credential = refs.credential, credLabel = refs.credLabel, dot = refs.dot,
+      tags = refs.tags, chat = refs.chat;
+
+    function reveal(i, text) {
+      seq.mark(function () { chat[i].text.textContent = text; });
+      seq.tween(chat[i].wrap, { height: 'auto', opacity: 1, ease: 'power2.out' }, T.chatReveal);
+    }
+
+    reveal(0, cycle.user);
+    seq.wait(T.chatHoldShort);
+
+    seq.appear(dot, function () { return lx(chat[0].wrap, rect()); }, function () { return cy(chat[0].wrap, rect()); });
+    seq.moveTo(dot, { x: function () { return cx(client, rect()); }, y: function () { return cy(client, rect()); } }, T.travelMed);
+    seq.mark(function () { client.classList.add('is-pulse-active'); setState(client, 'checking'); });
+    seq.vanish(dot);
+    seq.wait(T.thinkHold);
+
+    reveal(1, cycle.call);
+    seq.wait(T.chatHoldShort);
+
+    seq.appear(dot, function () { return cx(client, rect()); }, function () { return by(client, rect()); });
+    seq.mark(function () { client.classList.remove('is-pulse-active'); });
+    seq.moveTo(dot, { y: function () { return ty(gateway, rect()); } }, T.travelLong);
+    seq.mark(function () { gateway.classList.add('is-pulse-active'); });
+    seq.vanish(dot);
+    seq.wait(T.settleGap);
+
+    var denied = false;
+    ['auth', 'policy', 'audit'].forEach(function (k) {
+      var outcome = cycle.tags[k];
+      seq.checkTag(tags[k], outcome);
+      if (outcome === 'fail') denied = true;
+    });
+
+    if (denied) {
+      seq.mark(function () { gateway.classList.remove('is-pulse-active'); gateway.classList.add('is-pulse-denied'); });
+      seq.wait(T.deniedGap);
+      seq.appear(dot, function () { return cx(gateway, rect()); }, function () { return ty(gateway, rect()); });
+      seq.mark(function () { gateway.classList.remove('is-pulse-denied'); });
+      seq.moveTo(dot, { y: function () { return cy(client, rect()); } }, T.travelLong);
+    } else {
+      seq.mark(function () { setState(tags.broker, 'checking'); });
+      seq.wait(T.brokerCheckDelay);
+      seq.mark(function () {
+        credLabel.textContent = cycle.cred || '';
+        var gw = gateway.getBoundingClientRect(), r = rect(), s = scale();
+        gsap.set(credential, {
+          x: (gw.right - r.left) / s + 16,
+          y: (gw.top - r.top) / s + (gw.height / s) / 2 - credential.offsetHeight / 2
+        });
+      });
+      seq.tween(credential, { opacity: 1 }, T.credentialAppear);
+
+      seq.appear(dot, function () { return rx(gateway, rect()); }, function () { return cy(gateway, rect()); });
+      seq.moveTo(dot, { x: function () { return cx(credential, rect()); }, y: function () { return cy(credential, rect()); } }, T.travelMed);
+      seq.mark(function () { credential.classList.add('is-pulse-active'); });
+      seq.vanish(dot);
+      seq.wait(T.credHold);
+
+      seq.appear(dot, function () { return cx(credential, rect()); }, function () { return cy(credential, rect()); });
+      seq.mark(function () { credential.classList.remove('is-pulse-active'); });
+      seq.moveTo(dot, { x: function () { return rx(gateway, rect()); }, y: function () { return cy(gateway, rect()); } }, T.travelMed);
+      seq.mark(function () { setState(tags.broker, 'ok'); });
+      seq.tweenC(dot, { opacity: 0 }, T.dotFade);
+      seq.tween(credential, { opacity: 0 }, T.credentialVanish);
+
+      var target = cycle.target ? refs.leaves[cycle.target] : null;
+      if (target) {
+        seq.appear(dot, function () { return cx(gateway, rect()); }, function () { return by(gateway, rect()); });
+        seq.mark(function () { gateway.classList.remove('is-pulse-active'); });
+        seq.moveTo(dot, { y: function () { return ty(fanout, rect()); } }, T.travelShort);
+        seq.moveTo(dot, { x: function () { return cx(target, rect()); } }, T.travelMed);
+        seq.moveTo(dot, { y: function () { return ty(target, rect()); } }, T.travelShort);
+        seq.mark(function () { target.classList.add('is-pulse-active'); setState(target, 'checking'); });
+        seq.vanish(dot);
+        seq.wait(T.targetCheckHold);
+        seq.mark(function () { setState(target, 'ok'); });
+        seq.wait(T.arrivalHold);
+
+        seq.appear(dot, function () { return cx(target, rect()); }, function () { return ty(target, rect()); });
+        seq.mark(function () { target.classList.remove('is-pulse-active'); });
+        seq.moveTo(dot, { y: function () { return ty(fanout, rect()); } }, T.travelShort);
+        seq.moveTo(dot, { x: function () { return cx(gateway, rect()); } }, T.travelMed);
+        seq.moveTo(dot, { y: function () { return by(gateway, rect()); } }, T.travelShort);
+        seq.moveTo(dot, { y: function () { return cy(client, rect()); } }, T.travelLong);
+      }
+    }
+
+    seq.markAt(function () { setState(client, ''); client.classList.remove('is-pulse-active'); }, T.clearOffset);
+    seq.moveTo(dot, {
+      x: function () { return lx(chat[2].wrap, rect()); },
+      y: function () { return cy(chat[2].wrap, rect()); }
+    }, T.travelMed);
+    seq.vanish(dot);
+    seq.wait(T.settleGap);
+
+    reveal(2, cycle.result);
+    seq.wait(T.chatHoldFinal);
+
+    seq.mark(function () { client.classList.remove('is-pulse-active'); });
+    seq.tween(chat.map(function (l) { return l.wrap; }), { height: 0, opacity: 0, ease: 'power2.in' }, T.chatCollapse);
+    seq.mark(function () {
+      setState(tags.auth, ''); setState(tags.policy, ''); setState(tags.audit, ''); setState(tags.broker, '');
+      if (cycle.target) setState(refs.leaves[cycle.target], '');
+    });
+    return tl;
+  }
+
+  function resetAll() {
+    ['auth', 'policy', 'audit', 'broker'].forEach(function (k) { setState(refs.tags[k], ''); });
+    ['rucio', 'htcondor'].forEach(function (k) {
+      setState(refs.leaves[k], '');
+      refs.leaves[k].classList.remove('is-pulse-active');
+    });
+    setState(refs.client, '');
+    refs.client.classList.remove('is-pulse-active');
+    refs.gateway.classList.remove('is-pulse-active', 'is-pulse-denied');
+    refs.credential.classList.remove('is-pulse-active');
+    gsap.set(refs.dot, { opacity: 0 });
+    gsap.set(refs.credential, { opacity: 0 });
+    refs.chat.forEach(function (l) { gsap.set(l.wrap, { height: 0, opacity: 0 }); });
+  }
+
+  var master = gsap.timeline({ repeat: -1, repeatDelay: 1.3, paused: true });
+  CYCLES.forEach(function (c) { master.add(buildCycle(c)); });
+
+  function sync() {
+    var cur = Reveal.getCurrentSlide && Reveal.getCurrentSlide();
+    if (cur && cur.contains(root)) {
+      master.play();
+    } else if (master.progress() > 0 || master.isActive()) {
+      /* Rewind, not just pause: .call() side effects (classes, tag states,
+         chat text) outlive a plain pause, so clear them for a clean re-entry. */
+      master.pause(0);
+      resetAll();
+    }
+  }
+  Reveal.on('ready', sync);
+  Reveal.on('slidechanged', sync);
+})();
+</script>
+</body>
+</html>

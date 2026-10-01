@@ -1,0 +1,703 @@
+/* LLM-Assisted Analysis at the UC AF
+ *
+ * UChicago Analysis Facility theme.
+ * Palette: UChicago Maroon (#800000) primary on warm off-white,
+ * teal + slate cool accents for code/diagrams. Serif display for
+ * institutional moments, Inter for body, JetBrains Mono for code.
+ *
+ * All font sizes use pt (points) for predictable fixed-size slides.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+/* ===========================================
+   CSS VARIABLES
+   =========================================== */
+:root {
+  /* Backgrounds */
+  --background-color: #FCFBF9;          /* warm off-white */
+  --section-divider-bg: #800000;        /* maroon dividers, white text */
+
+  /* Typography */
+  --display-font: "Source Serif 4", Georgia, serif;
+  --heading-font: "Inter", Helvetica, sans-serif;
+  --body-font: "Inter", Helvetica, sans-serif;
+  --mono-font: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+  --base-font-size: 32px;
+  --text-size: 16pt;
+  --h1-size: 48pt;
+  --h2-size: 32pt;
+  --h3-size: 22pt;
+  --footnote-size: 11pt;
+
+  /* Colors */
+  --maroon: #800000;
+  --maroon-dark: #5C0000;
+  --maroon-soft: #f3e6e6;     /* maroon-tinted fill */
+  --teal: #1F6F78;
+  --teal-soft: #e4f0f1;
+  --slate: #2D3748;
+  --gold: #B49759;            /* warm metallic accent, used sparingly */
+
+  --primary-color: #800000;
+  --secondary-color: #1F6F78;
+  --text-color: #1A1A1A;
+  --muted-color: #6B6B6B;
+  --line-color: #D8D2CC;
+
+  /* Layout */
+  --slide-padding: 60px;
+  --slide-padding-top: 40px;
+  --content-gap: 22px;
+  --box-radius: 10px;
+}
+
+/* ===========================================
+   BASE
+   =========================================== */
+.reveal {
+  font-family: var(--body-font);
+  font-size: var(--base-font-size);
+}
+
+.reveal strong, .reveal b { font-weight: 700; color: inherit; }
+
+.reveal-viewport { background-color: var(--background-color); }
+
+.reveal-viewport.is-section-divider .slide-background.present {
+  background-color: var(--section-divider-bg) !important;
+}
+
+.reveal h1, .reveal h2, .reveal h3, .reveal h4, .reveal h5, .reveal h6 {
+  font-family: var(--heading-font);
+  text-transform: none;
+  color: var(--text-color);
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.reveal h1 { font-size: var(--h1-size); }
+.reveal h2 {
+  font-size: var(--h2-size);
+  margin-bottom: 0;
+  padding-bottom: 12px;
+  border-bottom: 3px solid var(--maroon);
+}
+.reveal h2 .accent { color: var(--maroon); }
+.reveal h3 { font-size: var(--h3-size); color: var(--maroon-dark); }
+
+.reveal p, .reveal li, .reveal td, .reveal th, .reveal blockquote {
+  font-size: var(--text-size);
+  color: var(--text-color);
+  line-height: 1.45;
+}
+
+/* Underlined by default -- .reveal code is also teal, so an unstyled link is
+   visually indistinguishable from styled-but-inert code text. The underline is
+   the only reliable "this is clickable" signal at a glance or projected on a screen. */
+.reveal a { color: var(--teal); text-decoration: underline; text-decoration-color: rgba(31,111,120,0.45); text-decoration-thickness: 1px; }
+.reveal a:hover { text-decoration-color: currentColor; }
+
+/* ===========================================
+   LISTS
+   =========================================== */
+.reveal ul { list-style: none; padding-left: 0; margin: 12px 0; }
+.reveal ol { margin: 12px 0 12px 1.1em; }
+.reveal ul li { position: relative; padding-left: 26px; margin-bottom: 9px; }
+.reveal ul li::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 0.55em;
+  width: 9px;
+  height: 9px;
+  background: var(--maroon);
+  border-radius: 2px;            /* small square = sharper, more technical */
+  transform: rotate(45deg);
+}
+.reveal ul ul { margin: 6px 0; }
+.reveal ul ul li::before { background: var(--teal); width: 7px; height: 7px; }
+.reveal li::marker { color: var(--maroon); }
+.reveal blockquote p { font-size: inherit; }
+
+/* ===========================================
+   SLIDE LAYOUT
+   =========================================== */
+.reveal .slides section {
+  height: 100%;
+  display: flex !important;
+  flex-direction: column !important;
+  padding: var(--slide-padding-top) var(--slide-padding) var(--slide-padding) var(--slide-padding) !important;
+  box-sizing: border-box;
+  text-align: left;
+}
+.reveal .slides section.stack { padding: 0 !important; }
+
+.reveal .slides section > .content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding-top: var(--content-gap);
+  text-align: left;
+  min-height: 0;
+}
+
+.reveal .slides section > .footnote {
+  position: absolute;
+  bottom: 14px;
+  /* left has extra clearance beyond --slide-padding so a wrapped 2nd line never
+     collides with the bottom-left slide number (its box can render text out to ~60px) */
+  left: 105px;
+  right: var(--slide-padding);
+  font-size: var(--footnote-size);
+  color: var(--muted-color);
+}
+
+/* Eyebrow / kicker label above a title */
+.reveal .kicker {
+  font-family: var(--heading-font);
+  font-size: 12pt;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin: 0 0 4px 0;
+}
+
+/* ===========================================
+   SECTION DIVIDERS - white on maroon
+   =========================================== */
+.reveal .slides section.section-divider {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  text-align: left;
+  padding-left: 90px !important;
+}
+.reveal .slides section.section-divider h1 {
+  font-family: var(--display-font);
+  font-size: 54pt;
+  font-weight: 600;
+  color: #ffffff;
+  text-align: left;
+  line-height: 1.1;
+}
+.reveal .slides section.section-divider h2 {
+  border: none;
+  color: #ffffff;
+}
+.reveal .slides section.section-divider p,
+.reveal .slides section.section-divider li { color: #F3E3E3; }
+.reveal .slides section.section-divider .kicker { color: var(--gold); }
+.reveal .slides section.section-divider .section-num {
+  font-family: var(--display-font);
+  font-size: 20pt;
+  color: var(--gold);
+  margin-bottom: 10px;
+}
+
+/* ===========================================
+   TITLE SLIDE (id=title) - special, light with maroon bar
+   =========================================== */
+.reveal .slides section#title {
+  background: var(--background-color);
+  justify-content: center !important;
+  align-items: flex-start !important;
+}
+.reveal .slides section#title h1 {
+  font-family: var(--display-font);
+  font-weight: 700;
+  font-size: 50pt;
+  color: var(--maroon);
+  line-height: 1.08;
+  border-left: 8px solid var(--maroon);
+  padding-left: 28px;
+  text-align: left;
+}
+.reveal .slides section#title .subtitle {
+  font-size: 22pt;
+  color: var(--slate);
+  margin-top: 18px;
+  padding-left: 36px;
+}
+.reveal .slides section#title .byline {
+  font-size: 15pt;
+  color: var(--muted-color);
+  padding-left: 36px;
+  margin-top: 6px;
+}
+
+/* Override the centered divider rule for the title (we want left-mid) */
+.reveal .slides section#title.section-divider {
+  align-items: flex-start !important;
+  justify-content: center !important;
+  padding-left: 70px !important;
+}
+
+/* ===========================================
+   TEXT UTILITIES
+   =========================================== */
+.text-lg  { font-size: 18pt !important; }
+.text-xl  { font-size: 20pt !important; }
+.text-2xl { font-size: 24pt !important; }
+.text-3xl { font-size: 28pt !important; }
+.text-4xl { font-size: 32pt !important; }
+.text-muted { color: var(--muted-color) !important; }
+.text-maroon { color: var(--maroon) !important; }
+.text-teal { color: var(--teal) !important; }
+.text-center { text-align: center !important; }
+.text-uppercase { text-transform: uppercase; letter-spacing: 0.1em; }
+.font-light { font-weight: 300; }
+.font-bold { font-weight: 700; }
+.mono { font-family: var(--mono-font); }
+
+/* ===========================================
+   BLOCKQUOTES
+   =========================================== */
+.reveal blockquote {
+  border-left: 4px solid var(--maroon);
+  padding: 6px 0 6px 22px;
+  margin: 16px 0;
+  font-style: italic;
+  background: none;
+  box-shadow: none;
+  width: 100%;
+  max-width: none;
+  font-family: var(--display-font);
+  font-size: 22pt;
+  line-height: 1.3;
+}
+.reveal blockquote cite {
+  display: block;
+  margin-top: 10px;
+  font-style: normal;
+  font-family: var(--body-font);
+  font-size: 14pt;
+  color: var(--muted-color);
+}
+
+/* ===========================================
+   CODE / COMMAND BOXES
+   =========================================== */
+.reveal pre {
+  width: 100%;
+  margin: 10px 0;
+  box-shadow: none;
+  font-size: 13.5pt;
+}
+.reveal pre code,
+.reveal code.block {
+  display: block;
+  font-family: var(--mono-font);
+  font-size: 13.5pt;
+  line-height: 1.5;
+  background: #FBF4F4;
+  border: 1px solid var(--line-color);
+  border-left: 4px solid var(--maroon);
+  border-radius: 6px;
+  padding: 14px 18px;
+  color: var(--slate);
+  max-height: none;
+  overflow: visible;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.reveal code {
+  font-family: var(--mono-font);
+  font-size: 0.9em;
+  background: var(--teal-soft);
+  color: var(--teal);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+/* inline code inside a styled code block shouldn't double-style */
+.reveal pre code code { background: none; padding: 0; }
+.reveal .cmd-prompt { color: var(--maroon); font-weight: 700; }
+.reveal .cmt { color: var(--muted-color); font-style: italic; }
+.reveal .kw { color: var(--maroon); font-weight: 600; }
+
+/* ===========================================
+   CARDS
+   =========================================== */
+.card {
+  background: #ffffff;
+  border: 1px solid var(--line-color);
+  border-top: 4px solid var(--maroon);
+  border-radius: var(--box-radius);
+  padding: 16px 18px;
+  box-shadow: 0 2px 10px rgba(92, 0, 0, 0.06);
+}
+.card.teal { border-top-color: var(--teal); }
+.card h3 { margin: 0 0 6px 0; font-size: 18pt; }
+.card .card-icon { font-size: 22pt; color: var(--maroon); margin-bottom: 6px; }
+.card.teal .card-icon { color: var(--teal); }
+.card p, .card li { font-size: 14pt; }
+
+/* ===========================================
+   TAGS / PILLS
+   =========================================== */
+.tag {
+  display: inline-block;
+  font-family: var(--heading-font);
+  font-size: 12pt;
+  font-weight: 600;
+  padding: 3px 12px;
+  border-radius: 999px;
+  background: var(--maroon-soft);
+  color: var(--maroon-dark);
+  margin: 2px 4px 2px 0;
+}
+.tag.teal { background: var(--teal-soft); color: var(--teal); }
+.tag.slate { background: #E7EAEF; color: var(--slate); }
+
+/* ===========================================
+   STAT BOXES
+   =========================================== */
+.stat { text-align: center; }
+.stat .num {
+  font-family: var(--display-font);
+  font-size: 42pt;
+  font-weight: 700;
+  color: var(--maroon);
+  line-height: 1;
+}
+.stat .label { font-size: 13pt; color: var(--muted-color); margin-top: 4px; }
+
+/* ===========================================
+   TABLES
+   =========================================== */
+.reveal table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+.reveal table th {
+  font-family: var(--heading-font);
+  font-weight: 700;
+  font-size: 14pt;
+  text-align: left;
+  background: var(--maroon);
+  color: #fff;
+  padding: 8px 12px;
+}
+.reveal table td {
+  font-size: 13.5pt;
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--line-color);
+  vertical-align: top;
+}
+.reveal table tr:nth-child(even) td { background: #F6F1ED; }
+.reveal table td code { font-size: 12.5pt; }
+
+/* ===========================================
+   DIAGRAM NODES + FLOW
+   =========================================== */
+.node {
+  background: #fff;
+  border: 2px solid var(--maroon);
+  border-radius: 8px;
+  padding: 10px 14px;
+  text-align: center;
+  font-family: var(--heading-font);
+  font-weight: 600;
+  font-size: 15pt;
+  color: var(--maroon-dark);
+}
+.node.teal { border-color: var(--teal); color: var(--teal); }
+.node.slate { border-color: var(--slate); color: var(--slate); }
+.node.fill { background: var(--maroon); color: #fff; border-color: var(--maroon); }
+.node .sub { display:block; font-family: var(--body-font); font-weight: 400; font-size: 11.5pt; color: var(--muted-color); margin-top: 3px; }
+.node.fill .sub { color: #f0dada; }
+.flow-arrow { color: var(--maroon); font-size: 24pt; display: flex; align-items: center; justify-content: center; }
+
+/* ===========================================
+   IMAGE / SCREENSHOT PLACEHOLDER
+   =========================================== */
+.shot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 220px;
+  border: 2px dashed var(--maroon);
+  border-radius: var(--box-radius);
+  background: repeating-linear-gradient(45deg, #fbf4f4, #fbf4f4 14px, #f6ebeb 14px, #f6ebeb 28px);
+  color: var(--maroon-dark);
+  text-align: center;
+  padding: 18px;
+}
+.shot i { font-size: 30pt; margin-bottom: 8px; }
+.shot .shot-label { font-family: var(--heading-font); font-weight: 700; font-size: 14pt; }
+.shot .shot-hint { font-size: 11.5pt; color: var(--muted-color); margin-top: 4px; }
+.shot img { max-width: 100%; max-height: 100%; border-radius: 6px; }
+.shot video { max-width: 100%; max-height: 100%; border-radius: 6px; }
+/* When a .shot holds a real asset, drop the dashed placeholder look */
+.shot.filled { border-style: solid; border-color: var(--line-color); background: #000; padding: 6px; }
+.shot.filled.light { background: #fff; }
+
+/* callout box for "why it matters" / key insight */
+.callout {
+  background: var(--maroon-soft);
+  border-radius: var(--box-radius);
+  padding: 14px 18px;
+  border-left: 5px solid var(--maroon);
+}
+.callout.teal { background: var(--teal-soft); border-left-color: var(--teal); }
+.callout p, .callout li { font-size: 15pt; }
+.callout .label {
+  font-family: var(--heading-font); font-weight: 700; font-size: 11pt;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--maroon); margin-bottom: 4px;
+}
+.callout.teal .label { color: var(--teal); }
+
+/* ===========================================
+   SLIDE NUMBER — bottom-left
+   =========================================== */
+.reveal .slide-number {
+  background: none;
+  color: var(--muted-color);
+  font-family: var(--body-font);
+  font-size: 11pt;
+  left: 14px;
+  right: auto;
+  bottom: 10px;
+}
+.reveal .slide-number a { color: var(--muted-color); }
+
+/* ===========================================
+   BUILD STAMP (deploy.yml injects sha + date, links to the repo)
+   top-right, out of the way of titles and the bottom-left slide number
+   =========================================== */
+.build-stamp {
+  position: fixed;
+  right: 14px;
+  top: 10px;
+  z-index: 40;
+  font-family: var(--body-font);
+  font-size: 9.5pt;
+}
+.build-stamp a {
+  color: var(--muted-color);
+  opacity: 0.6;
+  text-decoration: none;
+}
+.build-stamp a:hover { opacity: 1; }
+
+/* ===========================================
+   THEME LEAD-IN (§3 sub-section openers: theme-trust/ops/commons)
+   Not a title slide, not a full divider — large text, no boxes,
+   vertically + horizontally centered on the normal page background.
+   =========================================== */
+.theme-lead {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.theme-lead .theme-num {
+  font-family: var(--display-font);
+  font-size: 15pt;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--teal);
+  margin: 0 0 10px;
+}
+.theme-lead h2 {
+  font-size: 42pt;
+  margin: 0;
+  max-width: 900px;
+}
+.theme-lead .theme-thesis {
+  font-size: 17pt;
+  max-width: 760px;
+  margin-top: 24px;
+  color: var(--text-color);
+}
+.theme-lead .theme-covers {
+  font-size: 12.5pt;
+  color: var(--muted-color);
+  margin-top: 20px;
+}
+
+/* ===========================================
+   GATEWAY PULSE DIAGRAM (trace slide)
+   Ported from the mcp-portal.af.uchicago.edu landing animation via
+   R. Gardner's WLCG OTF12 deck (robrwg/2026-08-25-WLCG-OTF12), which
+   itself ports af-mcp-platform portal/src/lib/gatewayPulse.ts.
+   =========================================== */
+.pdiag-panel {
+  background: #0a0e1a;
+  border: 1px solid #1f2937;
+  border-radius: 12px;
+  padding: 14px 18px 18px;
+}
+.reveal .pdiag-url {
+  font-family: var(--mono-font);
+  font-size: 8.5pt;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #00d4c8;
+  margin: 0 0 12px;
+}
+.pdiag {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  --af-surface: #111827;
+  --af-border: #1f2937;
+  --af-dim: #9ca3af;
+  --af-label: #838d99;
+  --af-text: #e8ecf0;
+  --af-teal: #00d4c8;
+  --af-red: #ef4444;
+  --af-green: #10b981;
+}
+.pdiag .d-node {
+  font-family: var(--mono-font);
+  font-size: 10.5pt;
+  color: var(--af-text);
+  background: var(--af-surface);
+  border: 1px solid var(--af-border);
+  border-radius: 4px;
+  padding: 8px 22px;
+  transition: border-color 200ms, box-shadow 200ms;
+}
+.pdiag .is-pulse-active {
+  border-color: var(--af-teal) !important;
+  box-shadow: 0 0 16px 2px rgba(0, 212, 200, 0.3);
+}
+.pdiag .is-pulse-denied {
+  border-color: var(--af-red) !important;
+  box-shadow: 0 0 16px 2px rgba(239, 68, 68, 0.3);
+  animation: pdiag-denied-buzz 160ms ease-in-out 3;
+}
+@keyframes pdiag-denied-buzz {
+  0%, 100% { box-shadow: 0 0 16px 2px rgba(239, 68, 68, 0.3); }
+  50% { box-shadow: 0 0 24px 4px rgba(239, 68, 68, 0.65); }
+}
+.pdiag .d-client { display: inline-flex; align-items: center; gap: 6px; color: var(--af-dim); }
+.pdiag .d-gateway {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 26px;
+  border-color: var(--af-teal);
+}
+.pdiag .d-gwname { font-weight: 700; font-size: 11.5pt; letter-spacing: 0.02em; color: var(--af-text); }
+.pdiag .d-tags { display: flex; gap: 7px; }
+.pdiag .d-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--mono-font);
+  font-size: 7.5pt;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--af-label);
+  border: 1px solid var(--af-border);
+  border-radius: 2px;
+  padding: 2.5px 7px;
+}
+.pdiag .d-icon { position: relative; display: inline-block; width: 11px; height: 11px; flex-shrink: 0; }
+.pdiag .d-spin, .pdiag .d-check, .pdiag .d-x {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 150ms;
+}
+.pdiag .d-spin { border: 1.5px solid var(--af-border); border-top-color: var(--af-teal); border-radius: 50%; }
+.pdiag .d-check { color: var(--af-green); }
+.pdiag .d-x { color: var(--af-red); }
+.pdiag [data-state='checking'] .d-spin { opacity: 1; animation: pdiag-spin 550ms linear infinite; }
+.pdiag [data-state='ok'] .d-check { opacity: 1; }
+.pdiag [data-state='fail'] .d-x { opacity: 1; }
+@keyframes pdiag-spin { to { transform: rotate(360deg); } }
+.pdiag .d-link { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 5px 0; }
+.pdiag .d-link::before, .pdiag .d-link::after { content: ''; width: 1px; height: 11px; background: var(--af-border); }
+.pdiag .d-linklabel {
+  font-family: var(--mono-font);
+  font-size: 7.5pt;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--af-teal);
+}
+.pdiag .d-stem { width: 1px; height: 18px; background: var(--af-border); }
+.pdiag .d-fanout {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  width: 100%;
+  padding-top: 18px;
+  border-top: 1px solid var(--af-border);
+}
+.pdiag .d-branch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--mono-font);
+  font-size: 9.5pt;
+  color: var(--af-text);
+  background: var(--af-surface);
+  border: 1px solid var(--af-border);
+  border-radius: 4px;
+  padding: 7px 14px;
+  transition: border-color 200ms, box-shadow 200ms;
+}
+.pdiag .d-branch::before {
+  content: '';
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  width: 1px;
+  height: 18px;
+  background: var(--af-border);
+}
+.pdiag .d-pulse {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 8px;
+  height: 8px;
+  margin: -4px;
+  border-radius: 50%;
+  background: var(--af-teal);
+  box-shadow: 0 0 10px 2px rgba(0, 212, 200, 0.7);
+  opacity: 0;
+  pointer-events: none;
+}
+.pdiag .d-cred { position: absolute; top: 0; left: 0; font-size: 8.5pt; padding: 6px 11px; opacity: 0; pointer-events: none; }
+.pdiag .d-chat {
+  position: absolute;
+  top: 0;
+  right: -4px;
+  display: flex;
+  flex-direction: column;
+  width: 210px;
+  pointer-events: none;
+}
+.pdiag .d-chatline {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  font-family: var(--mono-font);
+  font-size: 8pt;
+  padding: 0 7px;
+  border-left: 1px solid var(--af-border);
+}
+.pdiag .d-chatrole { flex-shrink: 0; color: var(--af-teal); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+.pdiag .d-chattext { color: var(--af-dim); }
+@media (prefers-reduced-motion: reduce) {
+  .pdiag [data-state='checking'] .d-spin, .pdiag .is-pulse-denied { animation: none; }
+}

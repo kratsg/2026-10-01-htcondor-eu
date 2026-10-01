@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "grill-me": {
+      "source": "mattpocock/skills",
+      "sourceType": "github",
+      "skillPath": "skills/productivity/grill-me/SKILL.md",
+      "computedHash": "784f0dbb7403b0f00324bce9a112f715342777a0daee7bbb7385f9c6f0a170ea"
+    },
+    "revealjs": {
+      "source": "ryanbbrown/revealjs-skill",
+      "sourceType": "github",
+      "skillPath": "skills/revealjs/SKILL.md",
+      "computedHash": "9cb12cf3e2adce08accb72fb7db7edfb75f9eebd840b47e9c9a47b29b5392892"
+    }
+  }
+}

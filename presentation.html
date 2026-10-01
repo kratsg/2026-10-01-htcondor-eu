@@ -374,9 +374,11 @@ mcp.run()</code></pre>
       <p>Identity, authZ, credential brokering, and audit in <strong>one place</strong>: the same boundary a
          facility wants in front of its services, with or without AI.</p></div>
   </div>
-  <div class="footnote"><a href="https://github.com/kratsg/rucio-mcp">rucio-mcp</a> &middot; <a href="https://github.com/kratsg/ami-mcp">ami-mcp</a> &middot; <a href="https://github.com/atlas-outreach-data-tools/atlasopenmagic-mcp">atlasopenmagic</a> &middot; <a href="https://panda-wms.readthedocs.io/en/latest/advanced/mcp.html">panda-mcp</a> &middot; <a href="https://indico.cern.ch/event/1471803/contributions/6967102/">condor-mcp</a> (Bockelman, CHEP&nbsp;2026).</div>
+  <div class="footnote">Illustrative (July 2026); current services on the previous slide &middot; <a href="https://github.com/kratsg/rucio-mcp">rucio-mcp</a> &middot; <a href="https://github.com/kratsg/ami-mcp">ami-mcp</a> &middot; <a href="https://github.com/atlas-outreach-data-tools/atlasopenmagic-mcp">atlasopenmagic</a> &middot; <a href="https://panda-wms.readthedocs.io/en/latest/advanced/mcp.html">panda-mcp</a> &middot; <a href="https://indico.cern.ch/event/1471803/contributions/6967102/">condor-mcp</a> (Bockelman, CHEP&nbsp;2026).</div>
   <aside class="notes">
-    The same thing as one architecture picture, if you want the overview. The client, Claude,
+    The same thing as one architecture picture, if you want the overview. It's illustrative,
+    from July, so the backends along the bottom aren't exactly today's list; the previous slide
+    has the current one. The client, Claude,
     Gemini, whatever, holds only a bearer token. It hits the front door, mcp.af.uchicago.edu,
     which is oauth2-proxy in front of the AF's Keycloak. Behind that, the FastMCP aggregator and
     the credential broker do identity, authorization, credential brokering and audit, and fan out
@@ -1101,7 +1103,7 @@ Pass `offset=50` to see more.</code></pre>
       <tr><td>Read-only / destructive tool annotations</td><td>annotations recommended</td><td>compliant; fixed since PyHEP.dev</td></tr>
     </table>
   </div>
-  <div class="footnote">Spec: <a href="https://modelcontextprotocol.io/specification/2026-07-28">modelcontextprotocol.io/specification/2026-07-28</a> &middot; full comparison in <a href="https://github.com/kratsg/2026-09-08-pyhepdev-mcp/blob/main/mcp-design-talk.md">mcp-design-talk.md</a> &sect;6.3.</div>
+  <div class="footnote">Spec: <a href="https://modelcontextprotocol.io/specification/2026-07-28">modelcontextprotocol.io/specification/2026-07-28</a> &middot; full comparison in <a href="https://github.com/kratsg/2026-09-08-pyhepdev-mcp/blob/main/mcp-design-talk.md">mcp-design-talk.md</a> &sect;6.3 (outdated, pre-fixes).</div>
   <aside class="notes">
     Backup scorecard, for the "is MCP stable enough to build on" question. Three of my
     production-driven choices were later standardized in the 2.0 spec: statelessness, client-id

@@ -22,21 +22,23 @@ The slides:
 
 1. `title`
 2. `prompt`: from prompt to discovery ("what is needed behind this URL?"), AMG Weekly 2026-09-04
-3. `arch-swap`: model / harness / facility context & tools; "where do my job outputs go?"
-4. `what-is-mcp`: MCP intro (PyHEP.dev)
+3. `arch-swap`: model / harness / facility context; generic vs facility-aware answer to "where do my job outputs go?"
+4. `what-is-mcp` (+ `what-is-mcp-build` backup): MCP intro (PyHEP.dev)
 5. `capabilities`: MCP = arms and hands, skills = expertise (AMG Weekly)
 6. `facility-native`: convenient, secure, auditable (AMG Weekly)
-7. `naive-vs-real`: the tutorial picture vs the production chain (PyHEP.dev)
+7. `naive-vs-real` (+ `gateway-overview` Nikhef architecture figure): tutorial vs production chain, plus the MCP and credential layers
 8. `topology`: one MCP, many, or a gateway? (Nikhef)
-9. `trace` (+ `trace-steps` deep-dive): animated gateway diagram (PyHEP.dev / UH)
+9. `trace` (+ `trace-steps` deep-dive): animated gateway diagram, infrastructure-as-config
 10. `p-identity`: identity is ambient, never an argument (PyHEP.dev)
 11. `p-credentials` (+ `p-credentials-custodians` deep-dive, incl. condor-token-service) (PyHEP.dev)
-12. `ecosystem`: one facility, one summer, all in production (PyHEP.dev)
-13. `platform-scale` (+ `platform-scale-lessons` backup): what breaks at ten MCPs (PyHEP.dev)
+12. `platform-scale`: lessons learned, what breaks at ten MCPs (+ `interface-problem`, `p-errors`, `p-context`, `platform-scale-lessons` deep-dives) (PyHEP.dev)
+13. `considerations`: CIMD, ssh-oidc, sandboxing summarized, linking the Nikhef deep-dives
 14. `ops`: AI at every layer; the HTCondor daily report and drafted held-job emails (Nikhef)
 15. `demo`: live demo divider; the prompt is https://gist.github.com/kratsg/6956cf796e269c5d13cb2835e72ee664
-16. `interop` (+ `interop-spec` backup): interfaces that travel (PyHEP.dev)
-17. `close`: facility-aware collaborator, still-hard list, pointers
+16. `interop` (+ `interop-spec` backup, MCP 2.0 scorecard): interfaces that travel (PyHEP.dev)
+17. `appropriate`: when is an MCP server appropriate? (PyHEP.dev)
+18. `discuss`: what we don't know yet (Nikhef)
+19. `close`: facility-aware collaborator, still-hard list, pointers
 
 ## How to work on it
 

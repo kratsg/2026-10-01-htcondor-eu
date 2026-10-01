@@ -1,24 +1,24 @@
-# Agents Need Context, Not Just Models
+# The Facility Is the Context: Building an MCP Platform for Scientific Computing
 
-Slides by Giordon Stark (University of Chicago) for the **UH Physics & Astronomy AI
-"rap session"** on AI agents for HEP data analysis (24 September 2026). Format per the
-session's DJ notes: an informal, open discussion, three slides per speaker (this deck runs longer; trim if the DJ holds the line), security saved
-for the end.
+Slides by Giordon Stark (University of Chicago) for the **HTCondor Workshop Autumn 2026**
+(CC-IN2P3, Lyon), session "Condor and AI", 1 October 2026. A 20-minute talk with time held
+for a live demo of the AF MCP Platform at UChicago.
 
-**▶ View the deck:** https://kratsg.github.io/2026-09-24-uhawaii-colloquium-rap/
-**▶ Event page:** https://indico.phys.hawaii.edu/event/2985/
+**▶ View the deck:** https://kratsg.github.io/2026-10-01-htcondor-eu/
+**▶ Contribution page:** https://indico.cern.ch/event/1659396/contributions/7273024/
+**▶ Demo prompt:** https://gist.github.com/kratsg/6956cf796e269c5d13cb2835e72ee664
 
 The big picture: the model and the harness are swappable; what makes an agent useful (and
-safe to trust) is reliable, secure access to the tools, data, and context a facility
-already has. The slides are cut down from two earlier talks:
+safe to trust) on a shared facility is reliable, secure access to the software, data,
+workflows, and identities it already has. The main line is how the AF MCP Platform does
+that: one gateway, identity from the IdP on every call, credentials minted per service by
+custodians (including the one next to the HTCondor pool key), and services added by config.
+The slides are drawn from three earlier talks:
 
-- the Nikhef colloquium, 2026-07-01 ([deck](https://kratsg.github.io/2026-07-01-nikhef-colloquium/#/arch-swap)):
-  model / harness / facility-context framing, "ungrounded means silent", agents speak intent
-- ATLAS AMG Weekly, 2026-09-04 ("Towards Agentic Analysis"): prompt-to-discovery,
-  facility-native requirements, what the platform aggregates, capabilities and skills
-- CLARIPHY [awesome-hep-agentic-analysis](https://github.com/clariphy/awesome-hep-agentic-analysis)
-- PyHEP.dev 2026, 2026-09-07 ([repo](https://github.com/kratsg/2026-09-08-pyhepdev-mcp)):
-  the AF MCP Platform, MCP server design, and security architecture
+- the Nikhef colloquium, 2026-07-01 ([deck](https://kratsg.github.io/2026-07-01-nikhef-colloquium/))
+- PyHEP.dev 2026, 2026-09-07 ([repo](https://github.com/kratsg/2026-09-08-pyhepdev-mcp))
+- the UH AI rap session, 2026-09-24 ([repo](https://github.com/kratsg/2026-09-24-uhawaii-colloquium-rap)),
+  itself drawing on ATLAS AMG Weekly, 2026-09-04 ("Towards Agentic Analysis")
 
 The research behind every claim, with commit-level citations, is in
 [`mcp-design-talk.md`](mcp-design-talk.md).
@@ -26,16 +26,22 @@ The research behind every claim, with commit-level citations, is in
 ## The slides
 
 1. `title`
-2. `jfc`: bridge to the other rap talks (JFC paper arXiv:2603.20179, Kevin Flood, Zepeng Li)
-3. `prompt`: from prompt to discovery ("what is needed behind this URL?"), from AMG Weekly 2026-09-04
-4. `arch-swap`: model / harness / facility context & tools; "where do my job outputs go?"
-5. `what-is-mcp`: MCP intro (PyHEP.dev)
+2. `prompt`: from prompt to discovery ("what is needed behind this URL?"), AMG Weekly 2026-09-04
+3. `arch-swap`: model / harness / facility context & tools; "where do my job outputs go?"
+4. `what-is-mcp`: MCP intro (PyHEP.dev)
+5. `capabilities`: MCP = arms and hands, skills = expertise (AMG Weekly)
 6. `facility-native`: convenient, secure, auditable (AMG Weekly)
-7. `trace`: the MCP Platform, animated gateway diagram
-8. `behind-gateway`: MCP servers, identity brokering, others' servers (AMG Weekly)
-9. `capabilities`: MCP = arms and hands, skills = expertise, USATLAS marketplace (AMG Weekly)
-10. `clariphy`: CLARIPHY's curated awesome-hep-agentic-analysis list
-11. `design`: security as architecture + "treat the agent like a new student"; closing quote
+7. `naive-vs-real`: the tutorial picture vs the production chain (PyHEP.dev)
+8. `topology`: one MCP, many, or a gateway? (Nikhef)
+9. `trace` (+ `trace-steps` deep-dive): animated gateway diagram (PyHEP.dev / UH)
+10. `p-identity`: identity is ambient, never an argument (PyHEP.dev)
+11. `p-credentials` (+ `p-credentials-custodians` deep-dive, incl. condor-token-service) (PyHEP.dev)
+12. `ecosystem`: one facility, one summer, all in production (PyHEP.dev)
+13. `platform-scale` (+ `platform-scale-lessons` backup): what breaks at ten MCPs (PyHEP.dev)
+14. `ops`: AI at every layer; the HTCondor daily report and drafted held-job emails (Nikhef)
+15. `demo`: live demo divider; the prompt is https://gist.github.com/kratsg/6956cf796e269c5d13cb2835e72ee664
+16. `interop` (+ `interop-spec` backup): interfaces that travel (PyHEP.dev)
+17. `close`: facility-aware collaborator, still-hard list, pointers
 
 ## What's here
 

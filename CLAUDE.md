@@ -1,41 +1,42 @@
 # CLAUDE.md — working on this repo
 
-This repo is a **short reveal.js deck** (title + ten slides): "Agents Need Context, Not Just Models",
-Giordon Stark's contribution to the **UH Physics & Astronomy AI "rap session"**
-(2026-09-24, https://indico.phys.hawaii.edu/event/2985/). It is **public** and auto-deploys
-to GitHub Pages (https://kratsg.github.io/2026-09-24-uhawaii-colloquium-rap/).
+This repo is a **reveal.js deck**: "The Facility Is the Context: Building an MCP Platform for
+Scientific Computing", Giordon Stark's 20-minute talk (including a live demo) at the
+**HTCondor Workshop Autumn 2026** (CC-IN2P3 Lyon, 2026-10-01, session "Condor and AI",
+https://indico.cern.ch/event/1659396/contributions/7273024/). It is **public** and
+auto-deploys to GitHub Pages (https://kratsg.github.io/2026-10-01-htcondor-eu/).
 Read `README.md` for the audience-facing overview and `title-abstract.md` for the blurb;
 this file is for whoever edits it next.
 
-Session format (from the DJ notes on the event page): informal open discussion, **three
-slides per speaker**, focus on AI agents for **HEP data analysis**, privacy/security
-discussed **at the end**, no "future of humanity" tangents. Other speakers: Tommy Lam,
-Kevin Flood, Keisuke Yoshihara, Zepeng Li.
+The audience is **sysadmins**. The organizers asked for the implementation details of the
+AF MCP Platform rather than the visionary Nikhef framing, so the main line is platform
+internals; deep-dives sit in vertical stacks.
 
-It was cut down from the PyHEP.dev 2026 MCP deck (`kratsg/2026-09-08-pyhepdev-mcp`, same
-`styles.css`, `images/`, skills, and Pages workflow) plus the Nikhef colloquium
-(`kratsg/2026-07-01-nikhef-colloquium`, local at `~/2026-07-01-nikhef-colloquium`), whose
-`arch-swap` / `arch-quiet` / `arch-intent` slides supply the big-picture framing. The
-citation-grade source for every claim is **`mcp-design-talk.md`** (committed).
+Assembled from the Nikhef colloquium (`~/2026-07-01-nikhef-colloquium`, primary), the
+PyHEP.dev 2026 MCP deck (`~/2026-09-08-pyhepdev-mcp`, same `styles.css`, `images/`, skills,
+and Pages workflow), and the UH rap-session slides (`~/2026-09-24-uhawaii-colloquium-rap`,
+big picture + MCP concepts). The citation-grade source for every claim is
+**`mcp-design-talk.md`** (committed).
 
-The slides (the session asked for three per speaker, so keep it tight):
+The slides:
 
 1. `title`
-2. `jfc`: bridge to the other rap talks (JFC paper arXiv:2603.20179, Kevin Flood, Zepeng Li)
-3. `prompt`: from prompt to discovery ("what is needed behind this URL?"), from AMG Weekly 2026-09-04
-4. `arch-swap`: model / harness / facility context & tools; "where do my job outputs go?"
-5. `what-is-mcp`: MCP intro (PyHEP.dev)
+2. `prompt`: from prompt to discovery ("what is needed behind this URL?"), AMG Weekly 2026-09-04
+3. `arch-swap`: model / harness / facility context & tools; "where do my job outputs go?"
+4. `what-is-mcp`: MCP intro (PyHEP.dev)
+5. `capabilities`: MCP = arms and hands, skills = expertise (AMG Weekly)
 6. `facility-native`: convenient, secure, auditable (AMG Weekly)
-7. `trace`: the MCP Platform, animated gateway diagram
-8. `behind-gateway`: MCP servers, identity brokering, others' servers (AMG Weekly)
-9. `capabilities`: MCP = arms and hands, skills = expertise, USATLAS marketplace (AMG Weekly)
-10. `clariphy`: CLARIPHY's curated awesome-hep-agentic-analysis list
-11. `design`: security as architecture + "treat the agent like a new student"; closing quote
-
-Sources beyond the two decks: the AMG Weekly talk PDF (`~/Downloads/20260904_AMGWeekly.pdf`,
-not committed) and the CLARIPHY awesome list.
-
-The audience is physicists, not computing people: keep the jargon high level.
+7. `naive-vs-real`: the tutorial picture vs the production chain (PyHEP.dev)
+8. `topology`: one MCP, many, or a gateway? (Nikhef)
+9. `trace` (+ `trace-steps` deep-dive): animated gateway diagram (PyHEP.dev / UH)
+10. `p-identity`: identity is ambient, never an argument (PyHEP.dev)
+11. `p-credentials` (+ `p-credentials-custodians` deep-dive, incl. condor-token-service) (PyHEP.dev)
+12. `ecosystem`: one facility, one summer, all in production (PyHEP.dev)
+13. `platform-scale` (+ `platform-scale-lessons` backup): what breaks at ten MCPs (PyHEP.dev)
+14. `ops`: AI at every layer; the HTCondor daily report and drafted held-job emails (Nikhef)
+15. `demo`: live demo divider; the prompt is https://gist.github.com/kratsg/6956cf796e269c5d13cb2835e72ee664
+16. `interop` (+ `interop-spec` backup): interfaces that travel (PyHEP.dev)
+17. `close`: facility-aware collaborator, still-hard list, pointers
 
 ## How to work on it
 

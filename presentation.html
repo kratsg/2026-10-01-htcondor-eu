@@ -770,15 +770,21 @@ mint_ticket(claims[<span class="cmt">"sub"</span>])
   <div style="background:#15171c; color:#e8e8e8; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.25); font-family:var(--font-mono, monospace); padding:14px 22px; margin-top:22px; text-align:left;">
     <p style="margin:0; font-size:14pt; color:#e8e8e8;"><span style="color:#7fd1b9;">$</span> claude mcp add --transport http atlas-af https://mcp.af.uchicago.edu/mcp</p>
   </div>
-  <p style="font-size:16pt; margin-top:16px;"><a href="https://mcp-portal.af.uchicago.edu/" style="color:#f3e6e6;">mcp-portal.af.uchicago.edu</a></p>
+  <p style="font-size:15pt; margin-top:16px; color:#f3e6e6;">One prompt: submit an HTCondor job &middot; start a Jupyter server &middot; whoami &middot; service catalog &middot; AMI &middot; Rucio &middot; ATLAS OpenSearch &middot; watch the job finish</p>
+  <p style="font-size:16pt; margin-top:10px;"><a href="https://mcp-portal.af.uchicago.edu/" style="color:#f3e6e6;">mcp-portal.af.uchicago.edu</a> &middot; <a href="https://gist.github.com/kratsg/6956cf796e269c5d13cb2835e72ee664" style="color:#f3e6e6;">the demo prompt</a></p>
   <aside class="notes">
-    Switch to the browser and terminal here. Keep it to about five minutes.
+    Switch to the terminal and the portal here. Keep it to about five minutes.
     That one line is the whole client-side setup: add the facility as an MCP server, log in
-    through the browser with the facility identity, and the assistant sees the tools I'm
-    allowed to use, nothing else.
-    Run sheet, adjust live: the portal landing page and the services behind it; connect a client
-    and log in; one read, like finding a dataset; one batch call through condor-mcp; and one
-    call that policy denies, so you can see the refusal and the audit record.
+    with the facility identity, and the assistant sees only the tools I'm allowed to use.
+    Then one prompt, the gist linked on the slide. It starts the slow things first: submit a
+    ten-second sleep job to HTCondor, and start a small Jupyter server. While those run, the
+    read-only tour: whoami, with my IdP groups and effective permissions; the live service
+    catalog; an AMI cross-section and dataset lookup; where Rucio has the replicas; and a
+    search of the ATLAS OpenSearch graph through the Kerberos bridge. Then close the loop:
+    watch the condor job finish, and query which slot it ran on, the queue wait, runtime and
+    exit code, and check the Jupyter server's status.
+    The point to say out loud: every one of those calls was me, with a credential minted for
+    one service and thrown away, and no token in the agent.
     If the network fails me, the trace slide and its step-by-step deep-dive are the fallback.
   </aside>
 </section>

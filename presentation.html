@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agents Need Context, Not Just Models — UH AI Rap Session</title>
+<title>The Facility Is the Context — HTCondor Workshop Autumn 2026</title>
 
 <!-- Reveal.js core -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@6.0.1/dist/reset.css">
@@ -14,10 +14,12 @@
 <link rel="stylesheet" href="styles.css">
 
 <!--
-  "Agents Need Context, Not Just Models" — Giordon Stark's three slides for the UH Physics &
-  Astronomy AI "rap session" (2026-09-24). Cut down from the PyHEP.dev 2026 MCP deck and the
-  Nikhef 2026-07-01 colloquium; the evidence behind every claim is in mcp-design-talk.md.
-  Editing conventions, theme, and the gotchas are in CLAUDE.md.
+  "The Facility Is the Context: Building an MCP Platform for Scientific Computing" — Giordon
+  Stark's 20-minute talk at the HTCondor Workshop Autumn 2026 (CC-IN2P3, Lyon, 2026-10-01,
+  session "Condor and AI"), with time held for a live demo of the AF MCP Platform. Assembled
+  from the Nikhef 2026-07-01 colloquium, the PyHEP.dev 2026 MCP deck, and the UH rap-session
+  slides; the evidence behind every claim is in mcp-design-talk.md. Editing conventions,
+  theme, and the gotchas are in CLAUDE.md.
 -->
 </head>
 <body>
@@ -25,17 +27,17 @@
 <div class="slides">
 
 <!-- ============================================================ -->
-<!-- UH Physics & Astronomy AI "rap session", 2026-09-24:         -->
-<!-- three slides per speaker (DJ rules). Cut down from the       -->
-<!-- PyHEP.dev deck; the full deck is the source of every claim.  -->
+<!-- HTCondor Workshop Autumn 2026, 2026-10-01: 20 min incl. a    -->
+<!-- live demo. Audience: sysadmins, so the platform internals    -->
+<!-- are the main line; vertical stacks hold the deep-dives.      -->
 <!-- ============================================================ -->
 
 <section id="title">
   <div style="display:grid; grid-template-columns: 1.25fr 0.85fr; gap:40px; align-items:center; width:100%;">
     <div>
-      <p class="kicker">UH Physics &amp; Astronomy &middot; AI Rap Session &middot; 2026&#8209;09&#8209;24</p>
-      <h1 style="font-size:42pt;">Agents Need Context, Not Just Models</h1>
-      <p class="subtitle">Furnishing context safely at a real analysis facility</p>
+      <p class="kicker">HTCondor Workshop Autumn 2026 &middot; CC&#8209;IN2P3 Lyon &middot; 2026&#8209;10&#8209;01</p>
+      <h1>The Facility Is<br>the Context</h1>
+      <p class="subtitle">Building an MCP Platform for Scientific Computing</p>
       <p class="byline">Giordon Stark (University&nbsp;of&nbsp;Chicago) &middot; everything shown runs in production on the UChicago ATLAS Analysis Facility</p>
       <!-- the UChicago seal in the strip is white; the dark card keeps it visible on the off-white page -->
       <img src="images/logos.png" alt="University of Chicago, MANIAC Lab, Enrico Fermi Institute, IRIS-HEP, CERN" style="max-width:100%; margin-top:32px; background:#333; border-radius:10px; padding:10px 16px; box-sizing:border-box;">
@@ -45,55 +47,15 @@
       <img src="images/title-hero.png" alt="Agentic intelligence for research computing" style="max-width:100%; max-height:540px; border-radius:12px; box-shadow:0 8px 28px rgba(92,0,0,0.20);">
     </div>
   </div>
-  <div class="footnote">Slides AI-assisted by Claude (Anthropic) &middot; title illustration AI-generated. &middot; <a href="https://indico.phys.hawaii.edu/event/2985/">UH AI Rap Session</a></div>
+  <div class="footnote">Slides AI-assisted by Claude (Anthropic) &middot; title illustration AI-generated. &middot; <a href="https://indico.cern.ch/event/1659396/contributions/7273024/">HTCondor Workshop Autumn 2026</a></div>
   <aside class="notes">
     Quick intro: I'm a Deaf experimental physicist at the University of Chicago. I build
     statistical tools like pyhf and the analysis-facility infrastructure ATLAS physics runs on.
-    My take for this rap session: the limiting factor is rarely the model itself. The hard part
-    is giving it reliable, secure access to the tools, data, and domain knowledge we already use.
-    Everything I show runs in production at the UChicago ATLAS Analysis Facility today.
-  </aside>
-</section>
-
-<!-- ============================================================ -->
-<!-- 2. WHAT IS MCP (vertical stack: main + build-one BACKUP)     -->
-
-<!-- BRIDGE: tie in the other rap talks (JFC paper, Kevin Flood, Zepeng Li) -->
-<section id="jfc">
-  <p class="kicker">Picking up the thread</p>
-  <h2>&ldquo;Just furnish context&rdquo; &hellip; <span class="accent">from where?</span></h2>
-  <div class="content" style="justify-content:center; gap:22px;">
-    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:18px;">
-      <div class="card">
-        <h3>JFC paper</h3>
-        <p style="font-size:14pt;">Given a dataset, an execution framework, and prior papers, an agent ran a full analysis on open data.</p>
-      </div>
-      <div class="card">
-        <h3>Kevin</h3>
-        <p style="font-size:14pt;">A knowledge worker furnishes grounded context; every action passes an authority gate.</p>
-      </div>
-      <div class="card">
-        <h3>Zepeng</h3>
-        <p style="font-size:14pt;">Models went from failing college physics to handling research tasks.</p>
-      </div>
-    </div>
-    <div class="callout teal">
-      <p style="margin:0;">At a real facility, context lives behind logins: data catalogs, batch, storage, <em>your</em> credentials.
-         How do we furnish it to everyone, <strong>safely</strong>?</p>
-    </div>
-  </div>
-  <div class="footnote">Moreno <em>et al.</em>, <a href="https://arxiv.org/abs/2603.20179">arXiv:2603.20179</a> &middot; K. Flood and Z. Li, earlier in this session</div>
-  <aside class="notes">
-    I want to pick up where the earlier talks left off. The JFC paper, just furnish context:
-    give Claude Code a dataset, an execution framework, and the prior literature, and it gets
-    through a full analysis on open data. Kevin showed a factorized pipeline where a knowledge
-    worker furnishes grounded context, and nothing acts without passing an authority gate.
-    Zepeng showed how fast the models themselves have improved.
-    So I'll take "can it do the analysis" as settled enough, and ask the facility question.
-    On open data on a laptop, furnishing context is easy. At a real facility, the context lives
-    in services behind logins: the dataset catalog, the batch system, storage, and your personal
-    grid credentials. How do we give that to every user's agent without handing the model the
-    keys? That's what the rest of my slides are about.
+    This is an implementation talk. I'll spend about a dozen minutes on how the AF MCP Platform
+    is put together: the gateway, the identity plumbing, and the credential services, including
+    the one that sits next to the HTCondor pool key. Then I'll leave a few minutes to show you
+    the live platform. Everything I show runs in production at the UChicago ATLAS Analysis
+    Facility today.
   </aside>
 </section>
 
@@ -134,7 +96,7 @@
     </div>
     <div class="callout">
       <p style="margin:0;">The first two churn monthly and are interchangeable. The limiting factor is rarely the model: it's
-         <strong>reliable, secure access</strong> to the tools and data physicists already use.</p>
+         <strong>reliable, secure access</strong> to the tools, data, and identities users already have.</p>
     </div>
     <div class="callout teal">
       <p style="margin:0;">&ldquo;Where should my job outputs go?&rdquo; A generic model says your home area, and the quota fills in minutes.
@@ -143,13 +105,13 @@
   </div>
   <div class="footnote">Everything here runs in production at the UChicago ATLAS Analysis Facility &middot; <a href="https://mcp-portal.af.uchicago.edu/">mcp-portal.af.uchicago.edu</a></div>
   <aside class="notes">
-    Hi, I'm Giordon, I build analysis-facility infrastructure at UChicago for ATLAS. Three slides, big picture.
+    One slide of framing, then it's all implementation.
     The way I think about an agent is three blocks. The model, which you can swap: frontier API or open
     weights you host yourself. The harness, Claude Code, Codex, Copilot, also swappable. And the third
     block, the facility's context and tools: where the data lives, how you submit jobs, who you are. That
-    third block is the only durable, tractable piece, and it's the one we control. This is the "just
-    furnish context" point from the paper on the agenda, but in practice furnishing context is an
-    infrastructure problem, not a prompt problem.
+    third block is the only durable, tractable piece, and it's the one we, the people running the
+    facility, control. Furnishing context is an infrastructure problem, not a prompt problem, which
+    is why I think it belongs in this room.
     A concrete example. Ask a generic model where your batch job's outputs should go and it'll say
     next to the job, your home area, and the big files blow your quota in minutes. A model that knows
     the facility sends big outputs to fast local scratch and keeps small summaries in the backed-up
@@ -186,13 +148,48 @@
     Gemini CLI, an editor, speaks MCP to a server someone writes. That server can run on your laptop
     or be hosted at a facility, and it talks to what we already have: rucio for datasets, AMI for
     metadata, HTCondor for batch.
-    In JFC terms, this is a standard way to plug in the "execution framework" and the context, so
-    it works with any model. Tools are the primitive that matters in practice: typed functions the
+    For this room: it's a standard way to put a facility service in front of any model, the same
+    way you'd put an API in front of a schedd. Tools are the primitive that matters in practice: typed functions the
     model can call, described by a name, a schema, and a docstring. Not prompt engineering, not a
     custom model: ordinary interface design for an unusual caller.
   </aside>
 </section>
 
+<!-- CAPABILITIES AND KNOWLEDGE: MCP = hands, skills = expertise (AMG Weekly slide 7) -->
+<section id="capabilities">
+  <h2>Capabilities <span class="accent">and</span> knowledge</h2>
+  <div class="content" style="justify-content:center; gap:18px;">
+    <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:22px; align-items:stretch;">
+      <div class="card">
+        <h3><i class="fa-solid fa-hand card-icon" style="font-size:15pt;"></i> MCP: arms and hands</h3>
+        <p style="font-size:14pt;">The facility lets my agent <strong>do things</strong> and <strong>learn things</strong>:</p>
+        <ul style="font-size:13pt;">
+          <li>find datasets and metadata</li>
+          <li>submit and watch batch jobs</li>
+          <li>read my files, run my notebooks</li>
+        </ul>
+      </div>
+      <div class="card teal">
+        <h3><i class="fa-solid fa-brain card-icon" style="font-size:15pt;"></i> Skills: domain expertise</h3>
+        <p style="font-size:14pt;">The <a href="https://github.com/usatlas/marketplace">USATLAS marketplace</a> gives it know-how:</p>
+        <ul style="font-size:13pt;">
+          <li><strong>af-bnl</strong>, <strong>af-uchicago</strong>: how each facility works</li>
+          <li><strong>atlas</strong>: Rucio, AMI, Open Data, pyhf, cabinetry, HistFitter, ServiceX, &hellip;</li>
+          <li><strong>hep-python-tools</strong>: generic HEP Python tooling</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footnote">&ldquo;Towards Agentic Analysis&rdquo;, ATLAS AMG Weekly, 2026-09-04 &middot; <a href="https://github.com/usatlas/marketplace">github.com/usatlas/marketplace</a></div>
+  <aside class="notes">
+    Two halves of furnishing context. MCP servers give the agent arms and hands: it can do things,
+    submit jobs, find datasets, and learn things about your files and the facility. Skills give it
+    expertise: the USATLAS marketplace has skills for how the BNL and UChicago facilities work, for
+    the ATLAS toolchain from Rucio and AMI through pyhf, cabinetry and HistFitter, and for generic
+    HEP Python. For operators: skills are the cheap half. They're versioned markdown, and the
+    facility can publish its own, like how our storage and batch queues actually work.
+  </aside>
+</section>
 
 <!-- FACILITY-NATIVE MCP SERVER: the three requirements (AMG Weekly) -->
 <section id="facility-native">
@@ -224,8 +221,128 @@
   </aside>
 </section>
 
-<!-- 2. THE MCP PLATFORM: one gateway, many MCP servers -->
 
+<!-- THE SIMPLE PICTURE vs PRODUCTION (PyHEP.dev) -->
+<section id="naive-vs-real">
+  <h2>The simple picture, and what I actually run</h2>
+  <div class="content" style="justify-content:center; gap:26px;">
+    <div>
+      <p style="margin:0 0 8px 0;"><span class="tag teal">every MCP tutorial</span></p>
+      <div style="display:flex; align-items:center; gap:14px; max-width:820px;">
+        <div class="node teal" style="flex:1;">Agent</div>
+        <p class="flow-arrow" style="margin:0;">&#8594;</p>
+        <div class="node teal" style="flex:1;">MCP server</div>
+        <p class="flow-arrow" style="margin:0;">&#8594;</p>
+        <div class="node teal" style="flex:1;">Backend</div>
+      </div>
+    </div>
+    <div>
+      <p style="margin:0 0 8px 0;"><span class="tag">the UChicago AF, in production</span></p>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <div class="node" style="flex:1; font-size:12.5pt; padding:8px 6px;">User</div>
+        <p class="flow-arrow" style="margin:0; font-size:16pt;">&#8594;</p>
+        <div class="node" style="flex:1.2; font-size:12.5pt; padding:8px 6px;">OIDC identity<span class="sub">Keycloak</span></div>
+        <p class="flow-arrow" style="margin:0; font-size:16pt;">&#8594;</p>
+        <div class="node" style="flex:1.2; font-size:12.5pt; padding:8px 6px;">Agent<span class="sub">MCP client</span></div>
+        <p class="flow-arrow" style="margin:0; font-size:16pt;">&#8594;</p>
+        <div class="node fill" style="flex:1.5; font-size:12.5pt; padding:8px 6px;">Gateway + broker<span class="sub">authn &middot; authz &middot; audit</span></div>
+        <p class="flow-arrow" style="margin:0; font-size:16pt;">&#8594;</p>
+        <div class="node" style="flex:1.3; font-size:12.5pt; padding:8px 6px;">Domain MCP<span class="sub">Rucio, AMI, &hellip;</span></div>
+        <p class="flow-arrow" style="margin:0; font-size:16pt;">&#8594;</p>
+        <div class="node" style="flex:1.4; font-size:12.5pt; padding:8px 6px;">Credential custodians<span class="sub">VOMS &middot; krb5 &middot; condor</span></div>
+        <p class="flow-arrow" style="margin:0; font-size:16pt;">&#8594;</p>
+        <div class="node" style="flex:1.3; font-size:12.5pt; padding:8px 6px;">Scientific service<span class="sub">grid &middot; KDC &middot; schedd</span></div>
+      </div>
+    </div>
+    <div class="callout">
+      <p class="label">The point</p>
+      <p style="margin:0;">The limiting factor is rarely the LLM. It's reliable, secure access to what scientists already use.</p>
+    </div>
+  </div>
+  <aside class="notes">
+    Start with the three-box diagram every MCP tutorial draws, because it's true: agent, server,
+    backend, and the SDK makes that a weekend of work. Then reveal the second row: this is the
+    same tool call as it actually runs in production. The user authenticated through Keycloak,
+    the agent holds a personal access token, the gateway authenticates and authorizes once,
+    a broker mints a short-lived identity token for exactly one backend, the backend redeems it
+    for a real grid credential from a custodial service, and only then does Rucio hear about it.
+    Every box in that second row exists because something broke without it. That's the talk in
+    one line: design the interface for the model, design the architecture for the credential.
+  </aside>
+</section>
+
+<!-- TOPOLOGY: one MCP, many, or a gateway? (Nikhef) -->
+<section id="topology">
+  <p class="kicker">The first design choice</p>
+  <h2>One MCP, many, or a gateway?</h2>
+  <div class="content">
+    <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px;">
+      <div class="card">
+        <svg viewBox="0 0 220 90" style="width:100%; height:74px;">
+          <rect x="8" y="8" width="204" height="74" rx="8" fill="none" stroke="#800000" stroke-width="2" stroke-dasharray="4 3"/>
+          <text x="110" y="21" text-anchor="middle" font-size="9" fill="#800000" font-family="Inter,Helvetica,sans-serif" font-weight="600">one process boundary</text>
+          <rect x="20" y="30" width="52" height="40" rx="5" fill="#f3e6e6" stroke="#800000" stroke-width="1.2"/>
+          <text x="46" y="53" text-anchor="middle" font-size="10" font-family="Inter,Helvetica,sans-serif">atlas</text>
+          <rect x="84" y="30" width="52" height="40" rx="5" fill="#f3e6e6" stroke="#800000" stroke-width="1.2"/>
+          <text x="110" y="53" text-anchor="middle" font-size="10" font-family="Inter,Helvetica,sans-serif">cms</text>
+          <rect x="148" y="30" width="52" height="40" rx="5" fill="#f3e6e6" stroke="#800000" stroke-width="1.2"/>
+          <text x="174" y="53" text-anchor="middle" font-size="10" font-family="Inter,Helvetica,sans-serif">dune</text>
+        </svg>
+        <h3 style="font-size:15pt;">One server, many sites</h3>
+        <p style="font-size:12pt;"><i class="fa-solid fa-check text-teal"></i> one deploy &nbsp; <i class="fa-solid fa-triangle-exclamation text-maroon"></i> per-VO auth in one process</p></div>
+      <div class="card teal">
+        <svg viewBox="0 0 220 90" style="width:100%; height:74px;">
+          <rect x="6" y="18" width="62" height="60" rx="7" fill="none" stroke="#1F6F78" stroke-width="2"/>
+          <text x="37" y="40" text-anchor="middle" font-size="9.5" font-family="Inter,Helvetica,sans-serif" font-weight="600">atlas</text>
+          <text x="37" y="53" text-anchor="middle" font-size="8" fill="#6B6B6B" font-family="Inter,Helvetica,sans-serif">server</text>
+          <rect x="79" y="18" width="62" height="60" rx="7" fill="none" stroke="#1F6F78" stroke-width="2"/>
+          <text x="110" y="40" text-anchor="middle" font-size="9.5" font-family="Inter,Helvetica,sans-serif" font-weight="600">cms</text>
+          <text x="110" y="53" text-anchor="middle" font-size="8" fill="#6B6B6B" font-family="Inter,Helvetica,sans-serif">server</text>
+          <rect x="152" y="18" width="62" height="60" rx="7" fill="none" stroke="#1F6F78" stroke-width="2"/>
+          <text x="183" y="40" text-anchor="middle" font-size="9.5" font-family="Inter,Helvetica,sans-serif" font-weight="600">dune</text>
+          <text x="183" y="53" text-anchor="middle" font-size="8" fill="#6B6B6B" font-family="Inter,Helvetica,sans-serif">server</text>
+        </svg>
+        <h3 style="font-size:15pt;">One server per site</h3>
+        <p style="font-size:12pt;"><i class="fa-solid fa-check text-teal"></i> clean isolation &nbsp; <i class="fa-solid fa-triangle-exclamation text-maroon"></i> N servers to run</p></div>
+      <div class="card">
+        <svg viewBox="0 0 220 90" style="width:100%; height:74px;">
+          <rect x="79" y="6" width="62" height="28" rx="6" fill="#800000"/>
+          <text x="110" y="24" text-anchor="middle" font-size="9.5" fill="#fff" font-family="Inter,Helvetica,sans-serif" font-weight="600">gateway</text>
+          <line x1="110" y1="34" x2="46" y2="52" stroke="#800000" stroke-width="1.5"/>
+          <line x1="110" y1="34" x2="110" y2="52" stroke="#800000" stroke-width="1.5"/>
+          <line x1="110" y1="34" x2="174" y2="52" stroke="#800000" stroke-width="1.5"/>
+          <rect x="20" y="54" width="52" height="26" rx="5" fill="none" stroke="#6B6B6B" stroke-width="1.2"/>
+          <text x="46" y="71" text-anchor="middle" font-size="8.5" font-family="Inter,Helvetica,sans-serif">sub-MCP</text>
+          <rect x="84" y="54" width="52" height="26" rx="5" fill="none" stroke="#6B6B6B" stroke-width="1.2"/>
+          <text x="110" y="71" text-anchor="middle" font-size="8.5" font-family="Inter,Helvetica,sans-serif">sub-MCP</text>
+          <rect x="148" y="54" width="52" height="26" rx="5" fill="none" stroke="#6B6B6B" stroke-width="1.2"/>
+          <text x="174" y="71" text-anchor="middle" font-size="8.5" font-family="Inter,Helvetica,sans-serif">sub-MCP</text>
+        </svg>
+        <h3 style="font-size:15pt;">Single gateway</h3>
+        <p style="font-size:12pt;"><i class="fa-solid fa-check text-teal"></i> one identity &nbsp; <i class="fa-solid fa-triangle-exclamation text-maroon"></i> token sprawl / choke point</p></div>
+    </div>
+    <div class="callout" style="margin-top:14px;">
+      <p style="margin:0;">We run the <strong>gateway</strong>: one identity, one place to authorize and audit. The rest of the talk is paying down its costs.</p>
+    </div>
+    <p class="text-muted" style="font-size:12.5pt; margin-top:10px;"><a href="https://gofastmcp.com/servers/composition">FastMCP</a> composition = one auth provider per server; that constraint drives a lot of the design.</p>
+  </div>
+  <aside class="notes">
+    Once you have more than one MCP server, the first real decision is topology. One server that
+    knows about every experiment is one deploy, but now per-VO auth lives in a single process. One
+    server per site is clean isolation, and N things to run and patch. Or a single gateway in
+    front of many sub-MCPs: users see one endpoint and one identity, and you get one place to
+    authorize and audit every call.
+    We went with the gateway. It has two costs you can see on the card: token sprawl, because
+    every backend needs its own credential, and a choke point, because everything goes through
+    it. The rest of the talk is mostly how we pay those down. One practical constraint pushed
+    us there: FastMCP composition gives you one auth provider per server, so you can't just
+    mount ten servers with ten different auth stories into one process.
+  </aside>
+</section>
+
+<!-- THE MCP PLATFORM: one gateway, many MCP servers (stack: +step-by-step DEEP-DIVE) -->
+
+<section>
 <section id="trace">
   <h2>The MCP Platform: <span class="accent">one gateway</span>, many MCP servers</h2>
   <div class="content">
@@ -294,157 +411,483 @@
   </aside>
 </section>
 
-<!-- BEHIND THE GATEWAY: what the platform aggregates (AMG Weekly slides 5-6) -->
-<section id="behind-gateway">
-  <h2>What sits <span class="accent">behind</span> the gateway</h2>
-  <div class="content" style="justify-content:center; gap:16px;">
+<!-- DEEP-DIVE: the same call as numbered steps (PyHEP.dev) -->
+<section id="trace-steps">
+  <h2>The same call, step by step <span class="accent">&middot; deep-dive</span></h2>
+  <div class="content" style="gap:8px; justify-content:center;">
+    <div style="display:grid; grid-template-columns: 34px 1fr; gap:8px 12px; align-items:start;">
+      <p class="mono text-maroon font-bold" style="margin:0; font-size:14pt;">1</p>
+      <p style="margin:0; font-size:14pt;">Claude calls <code>rucio-atlas_rucio_list_dataset_replicas</code> with its <strong>personal access token</strong></p>
+      <p class="mono text-maroon font-bold" style="margin:0; font-size:14pt;">2</p>
+      <p style="margin:0; font-size:14pt;">Gateway authenticates; groups and POSIX identity come <strong>from the IdP (Keycloak)</strong> on every call</p>
+      <p class="mono text-maroon font-bold" style="margin:0; font-size:14pt;">3</p>
+      <p style="margin:0; font-size:14pt;">Authorized once: this tool requires <code>read_data</code>; <strong>denials are audited too</strong></p>
+      <p class="mono text-maroon font-bold" style="margin:0; font-size:14pt;">4</p>
+      <p style="margin:0; font-size:14pt;">Broker mints a JWT: <code>aud=rucio-mcp-atlas</code> (one service), <code>exp</code>&nbsp;=&nbsp;10&nbsp;min; it says <strong>who you are, not what you may do</strong></p>
+      <p class="mono text-maroon font-bold" style="margin:0; font-size:14pt;">5</p>
+      <p style="margin:0; font-size:14pt;">rucio-mcp verifies that JWT, then redeems the <strong>VOMS proxy directly from the broker's vault</strong></p>
+      <p class="mono text-maroon font-bold" style="margin:0; font-size:14pt;">6</p>
+      <p style="margin:0; font-size:14pt;">One Rucio call as the user; proxy deleted; <strong>one audit record</strong>, traced and metered</p>
+    </div>
+    <div class="callout teal" style="margin-top:6px;">
+      <p style="margin:0; font-size:14pt;">The user's token is never forwarded downstream; proxies and tickets never pass through the gateway.</p>
+    </div>
+  </div>
+  <aside class="notes">
+    The deep-dive version of the animation, for questions. The thing to notice is how many
+    different tokens exist: the personal access token the client holds, the ten-minute JWT the
+    broker mints for exactly one backend, and the VOMS proxy the backend redeems directly from
+    the broker's vault. Each hop exchanges rather than forwards, which is what the MCP spec's
+    authorization section requires.
+    Also notice what the broker's JWT does not contain: permissions. It says who you are; what
+    you may do is decided at the gateway from your Keycloak groups, on every call, so removing
+    someone from a group takes effect immediately instead of when their token expires.
+  </aside>
+</section>
+</section>
+
+<!-- IDENTITY IS AMBIENT (PyHEP.dev) -->
+<section id="p-identity">
+  <h2>Identity is ambient, never an argument</h2>
+  <div class="content" style="gap:14px;">
+    <div style="display:grid; grid-template-columns: 1.15fr 1fr; gap:24px; align-items:start;">
+      <div>
+        <pre><code class="block">@mcp.tool()
+async def create_jupyter_server(
+    image: str,
+    name: str | None = None,
+    cpu_cores: int = 2,
+    memory_gb: int = 8,
+    ...
+) -&gt; str:
+    """...The server is always owned by the caller
+    (from their verified broker identity) --
+    there is no owner argument. ..."""
+    claims = await get_broker_claims(ctx, verifier)
+    ... create_notebook(owner=claims.unixname, ...)</code></pre>
+      </div>
+      <div>
+        <ul style="margin-top:6px;">
+          <li><strong>No tool takes a username.</strong> The schema cannot express "read bob's files"</li>
+          <li><strong>One rule, different ways to implement, e.g.:</strong> k8s owner labels &middot; kernel uid/gid &middot; the VOMS nickname in your proxy</li>
+          <li><strong>Who you are comes from the identity provider (e.g. Keycloak) on every call</strong>, not from what a token claims</li>
+        </ul>
+        <div class="callout" style="margin-top:10px;">
+          <p class="label">The principle</p>
+          <p style="margin:0; font-size:13.5pt;">Do not expose dangerous parameters; derive them from verified identity.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footnote"><a href="https://github.com/maniaclab/af-jupyterlab-mcp/blob/main/src/af_jupyterlab_mcp/tools/jupyterlab.py">af-jupyterlab-mcp <code>tools/jupyterlab.py</code></a>, abridged.</div>
+  <aside class="notes">
+    Every agent-facing schema in the fleet has the same absence: there is no owner or username
+    parameter anywhere. The user is whoever the verified token says, full stop. An LLM argument
+    can be hallucinated or injected; a verified claim can't.
+    One rule, implemented differently per backend: Kubernetes owner labels for notebooks, an
+    actual setuid subprocess for the filesystem so the kernel does the enforcement, and the VOMS
+    nickname inside your redeemed grid proxy for Rucio and AMI.
+    And one sharpening: even the token doesn't carry authority. Who you are, your groups and your
+    unix identity, is looked up from the identity provider, Keycloak in my case, on every call,
+    rather than trusted from token contents. That's what makes removing someone from a group take
+    effect in seconds instead of whenever their token expires.
+  </aside>
+</section>
+
+<!-- KEEP CREDENTIALS OUT OF THE MCP (stack: +custodians DEEP-DIVE) (PyHEP.dev) -->
+<section>
+<section id="p-credentials">
+  <h2>Keep credentials out of the MCP</h2>
+  <div class="content" style="gap:16px;">
     <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:18px;">
       <div class="card">
-        <h3 style="font-size:15pt;">MCP servers I built</h3>
-        <ul style="font-size:13pt;">
-          <li><a href="https://github.com/kratsg/rucio-mcp"><strong>rucio</strong></a>: find datasets, replicas, transfers</li>
-          <li><a href="https://github.com/kratsg/ami-mcp"><strong>ami</strong></a>: sample discovery, cross sections</li>
-          <li><a href="https://github.com/maniaclab/af-filesystem-mcp"><strong>filesystem</strong></a>: read your own files</li>
-          <li><a href="https://github.com/maniaclab/af-jupyterlab-mcp"><strong>jupyterlab</strong></a>: run notebooks</li>
-        </ul>
-      </div>
-      <div class="card teal">
-        <h3 style="font-size:15pt;">Identity brokering</h3>
-        <ul style="font-size:13pt;">
-          <li><strong>af-credentials</strong>: redeem against the facility's identity broker</li>
-          <li>Mint a <strong>Kerberos</strong> ticket, <strong>VOMS</strong> proxy, or <strong>HTCondor</strong> token, per user, short-lived</li>
-        </ul>
+        <h3>Lifetime == one call</h3>
+        <p style="font-size:13.5pt;">e.g. a VOMS proxy or Kerberos ticket: fetch it &rarr; 0600 temp file &rarr; one backend call &rarr; delete it. The MCP server keeps nothing.</p>
       </div>
       <div class="card">
-        <h3 style="font-size:15pt;">Others' servers</h3>
-        <ul style="font-size:13pt;">
-          <li>B. Bockelman: <a href="https://github.com/bbockelm/golang-htcondor"><strong>HTCondor</strong></a></li>
-          <li>T. Maeno: <strong>PanDA</strong>*</li>
-          <li>J. Oliver: <a href="https://gitlab.cern.ch/atlas-search/mcp"><strong>atlas-search</strong></a>*</li>
-        </ul>
-        <p class="text-muted" style="font-size:11pt; margin:4px 0 0 0;">*integration forthcoming</p>
+        <h3>Exchange, never forward</h3>
+        <p style="font-size:13.5pt;">The user's token never goes downstream (the spec forbids it). Each hop gets a fresh short-lived JWT, valid for <strong>one service</strong>, expiring in <strong>10 minutes</strong>.</p>
+      </div>
+      <div class="card">
+        <h3>One service per secret</h3>
+        <p style="font-size:13.5pt;">e.g. only <code>condor-token-service</code> touches the Condor pool key; the broker is its only allowed caller, and it returns short-lived IDTokens.</p>
+      </div>
+    </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:22px; align-items:start;">
+      <div>
+        <p style="margin:0 0 6px 0;"><span class="tag">bad: a token service deciding permissions</span></p>
+        <pre style="margin:0;"><code class="block" style="font-size:12pt; border-left-color:#a33;"><span class="kw">if</span> <span class="cmt">"atlas-users"</span> <span class="kw">in</span> token[<span class="cmt">"groups"</span>]:
+    mint_ticket(user)
+<span class="cmt"># a second copy of the access rules,
+# trusting whatever the token claims</span></code></pre>
+      </div>
+      <div>
+        <p style="margin:0 0 6px 0;"><span class="tag teal">good: it only verifies who is calling</span></p>
+        <pre style="margin:0;"><code class="block" style="font-size:12pt; border-left-color:var(--teal);">claims = verify(token, aud=<span class="cmt">"krb5-token-service"</span>)
+mint_ticket(claims[<span class="cmt">"sub"</span>])
+<span class="cmt"># the gateway already decided permissions;
+# this token proves who, from the broker</span></code></pre>
+        <p class="text-muted" style="font-size:11.5pt; margin:4px 0 0 0;">sketch; written into all three token services' docstrings (<a href="https://github.com/maniaclab/krb5-token-service/blob/main/src/krb5_token_service/app.py">krb5 <code>app.py</code></a>)</p>
+      </div>
+    </div>
+    <div class="callout teal">
+      <p style="margin:0;">Never store secrets in the MCP server. Keep them in a vault (OpenBao, here) behind the broker, and mint short-lived credentials per call.</p>
+    </div>
+  </div>
+  <aside class="notes">
+    The architectural heart, and the abstract's promise: authentication without exposing user
+    credentials. Three moves across the cards. First, credential lifetime equals tool-call
+    lifetime: when rucio-mcp needs your grid proxy, it fetches it, writes a mode-0600 temp file,
+    makes exactly one backend call, and deletes it, success or failure. I test the deletion.
+    Second, exchange instead of forwarding: the user's own token never goes downstream, which the
+    MCP spec explicitly forbids. What goes downstream is a fresh JWT the broker mints, valid for
+    exactly one service and expiring in ten minutes. Heavy material like proxy files never passes
+    through the gateway at all; the backend fetches it directly from the broker.
+    The bad-versus-good pair is about where permission decisions live. Bad: the token service
+    checks the token's groups itself. Now the access rules exist in two places, and this copy
+    trusts whatever the token happens to claim, so a stale token keeps its access. Good: the
+    service verifies only that this is a valid broker token addressed to it, and mints for
+    whoever the token says. The permission check already happened once, at the gateway, against
+    live Keycloak groups. That rule is written into all three token services' docstrings so
+    nobody re-grows a second permission layer.
+    And nothing secret lives in an MCP server: it's all in a vault, OpenBao in my case, behind the
+    broker. Deep-dive below on the three custodians, including the HTCondor one.
+  </aside>
+</section>
+
+<!-- DEEP-DIVE: the custodial services -->
+<section id="p-credentials-custodians">
+  <h2>The custodians <span class="accent">&middot; deep-dive</span></h2>
+  <div class="content" style="gap:16px;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:18px;">
+      <div class="card">
+        <h3>voms-token-service</h3>
+        <p style="font-size:13pt;">The only pod that sees home dirs and Globus passphrases. Runs <code>voms-proxy-init</code> impersonated; privilege floor found live, five times.</p>
+      </div>
+      <div class="card">
+        <h3>krb5-token-service</h3>
+        <p style="font-size:13pt;">Password &rarr; <code>kinit</code> &rarr; ticket; zero secrets at rest, passwords zeroed on every exit path. Rate limiter protects <strong>CERN's</strong> lockout counter, not itself.</p>
+      </div>
+      <div class="card">
+        <h3>condor-token-service</h3>
+        <p style="font-size:13pt;">Runs <code>condor_token_create</code> next to the pool key, which "must never reach the broker": it can mint <em>any</em> identity.</p>
       </div>
     </div>
     <div class="callout">
-      <p style="margin:0;">Anyone's MCP server can plug in. The platform handles identity; the server just does its job.</p>
+      <p class="label">Why three services, not one</p>
+      <p style="margin:0;">Different privilege floors (root+caps / none / one init container). Merging them forces the union of privileges onto everything. Each is a one-question audit: "did this call come from the broker?"</p>
     </div>
   </div>
-  <div class="footnote"><a href="https://mcp-portal.af.uchicago.edu/">mcp-portal.af.uchicago.edu</a> &middot; <a href="https://github.com/maniaclab/af-mcp-platform">af-mcp-platform</a></div>
+  <div class="footnote">Orchestrate the hardened native binary; parse artifacts (ccache bytes, PEM), never CLI prose.</div>
   <aside class="notes">
-    Concretely, what's behind it today. Four MCP servers I wrote: rucio for dataset discovery and
-    replicas, AMI for sample metadata and cross sections, a filesystem server that reads only your
-    own files, and a JupyterLab server that manages your notebooks and runs code. Then the part
-    nobody sees: identity brokering. You authenticate once against the facility's identity broker,
-    and small token services mint a Kerberos ticket, a VOMS proxy, or an HTCondor token for you,
-    short-lived, per call. And servers other people wrote plug in the same way: Brian Bockelman's
-    HTCondor server, with Tadashi Maeno's PanDA and Jason Oliver's atlas-search integrations coming.
+    Deep-dive for questions. Three services because three root secrets with three different
+    privilege needs. voms needs root plus capabilities to read user keys, and every one of those
+    facts was discovered in production: grid tooling checks file ownership, not just mode.
+    krb5 needs no privileges at all and holds nothing; its rate limiter exists to protect CERN's
+    account-lockout counter, a third party, which is my favorite example of consequence-driven
+    design. condor sits next to the symmetric pool key that can mint tokens for any identity,
+    which is exactly why it must never reach the broker's trust domain.
+    Common thread: all three shell out to the battle-tested native binary and parse artifacts,
+    ccache bytes and PEM, never the human-readable CLI output, which turned out to be
+    locale-dependent.
   </aside>
 </section>
-
-<!-- CAPABILITIES AND KNOWLEDGE: MCP = hands, skills = expertise (AMG Weekly slide 7) -->
-<section id="capabilities">
-  <h2>Capabilities <span class="accent">and</span> knowledge</h2>
-  <div class="content" style="justify-content:center; gap:18px;">
-    <div style="display:grid; grid-template-columns: 1fr 1.3fr; gap:22px; align-items:stretch;">
-      <div class="card">
-        <h3><i class="fa-solid fa-hand card-icon" style="font-size:15pt;"></i> MCP: arms and hands</h3>
-        <p style="font-size:14pt;">The facility lets my agent <strong>do things</strong> and <strong>learn things</strong>:</p>
-        <ul style="font-size:13pt;">
-          <li>find datasets and metadata</li>
-          <li>submit and watch batch jobs</li>
-          <li>read my files, run my notebooks</li>
-        </ul>
-      </div>
-      <div class="card teal">
-        <h3><i class="fa-solid fa-brain card-icon" style="font-size:15pt;"></i> Skills: domain expertise</h3>
-        <p style="font-size:14pt;">The <a href="https://github.com/usatlas/marketplace">USATLAS marketplace</a> gives it know-how:</p>
-        <ul style="font-size:13pt;">
-          <li><strong>af-bnl</strong>, <strong>af-uchicago</strong>: how each facility works</li>
-          <li><strong>atlas</strong>: Rucio, AMI, Open Data, pyhf, cabinetry, HistFitter, ServiceX, &hellip;</li>
-          <li><strong>hep-python-tools</strong>: generic HEP Python tooling</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-  <div class="footnote">&ldquo;Towards Agentic Analysis&rdquo;, ATLAS AMG Weekly, 2026-09-04 &middot; <a href="https://github.com/usatlas/marketplace">github.com/usatlas/marketplace</a></div>
-  <aside class="notes">
-    Two halves of furnishing context. MCP servers give the agent arms and hands: it can do things,
-    submit jobs, find datasets, and learn things about your files and the facility. Skills give it
-    expertise: the USATLAS marketplace has skills for how the BNL and UChicago facilities work, for
-    the ATLAS toolchain from Rucio and AMI through pyhf, cabinetry and HistFitter, and for generic
-    HEP Python. That's the "how a physicist would do it" layer the JFC paper shows matters.
-  </aside>
 </section>
 
-<!-- CURATION: CLARIPHY awesome-hep-agentic-analysis -->
-<section id="clariphy">
-  <p class="kicker">Community &middot; CLARIPHY</p>
-  <h2>Where do I <span class="accent">find</span> all this?</h2>
-  <div class="content" style="justify-content:center; gap:18px;">
-    <p class="text-lg" style="margin:0;"><a href="https://github.com/clariphy/awesome-hep-agentic-analysis"><strong>awesome-hep-agentic-analysis</strong></a>: one curated index of HEP agentic tooling, for any harness.</p>
-    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:18px;">
-      <div class="card"><h3 style="font-size:15pt;">What's listed</h3>
-        <p style="font-size:13.5pt;">JFC, plugin marketplaces, MCP servers (Rucio, HTCondor, ServiceX, &hellip;), knowledge assistants</p></div>
-      <div class="card"><h3 style="font-size:15pt;">The bar</h3>
-        <p style="font-size:13.5pt;">HEP-specific, <strong>first-hand</strong> (you use or maintain it), usable today</p></div>
-      <div class="card teal"><h3 style="font-size:15pt;">Agent-readable</h3>
-        <p style="font-size:13.5pt;">Datacard per entry + <code>llms.txt</code>, so your agent can search it too</p></div>
+<!-- ONE FACILITY, ONE SUMMER (PyHEP.dev) -->
+<section id="ecosystem">
+  <h2>One facility, one summer <span class="accent">&middot; all in production</span></h2>
+  <div class="content" style="gap:18px;">
+    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:18px;">
+      <div class="stat"><p class="num">7</p><p class="label">services behind one gateway</p></div>
+      <div class="stat"><p class="num">124</p><p class="label">tools</p></div>
+      <div class="stat"><p class="num">6</p><p class="label">credential types</p></div>
+      <div class="stat"><p class="num">~900</p><p class="label">users on the UChicago ATLAS AF</p></div>
     </div>
-    <div class="callout teal">
-      <p style="margin:0;">Came out of the CLARIPHY Agentic Workflows breakout (Madison, Sept 2026). <strong>Contributions welcome.</strong></p>
-    </div>
-  </div>
-  <div class="footnote"><a href="https://github.com/clariphy/awesome-hep-agentic-analysis">github.com/clariphy/awesome-hep-agentic-analysis</a> &middot; <a href="https://indico.global/event/18639/">CLARIPHY meeting</a> &middot; whitepaper <a href="https://arxiv.org/abs/2602.17582">arXiv:2602.17582</a></div>
-  <aside class="notes">
-    A practical question I kept hearing: where do I even find these tools? At the CLARIPHY AI
-    collaboration meeting in Madison last week, the agentic-workflows breakout reviewed a scattered
-    set of tools, JFC, the IRIS-HEP and USATLAS marketplaces, HTCondor and Rucio MCP, and one concrete
-    outcome was a single curated index. The bar is that it's HEP-specific, first-hand, meaning the
-    person adding it actually uses or maintains it, and usable today. Every entry has a datacard, and
-    there's an llms.txt, so you can point your own agent at the list. Please add your tools.
-  </aside>
-</section>
-
-<!-- 3. SECURITY BY ARCHITECTURE, AGENTS BY DESIGN -->
-<section id="design">
-  <h2>Secure the <span class="accent">architecture</span>, design the <span class="accent">interface</span></h2>
-  <div class="content" style="gap:18px; justify-content:center;">
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:22px;">
       <div class="card">
-        <h3><i class="fa-solid fa-shield-halved card-icon" style="font-size:15pt;"></i> Security is structural</h3>
+        <h3>The MCP layer</h3>
         <ul>
-          <li><strong>No tool takes a username</strong>: identity comes from the verified token, never the LLM</li>
-          <li><strong>No credentials in the MCP</strong>: vault &rarr; mint per call &rarr; use once &rarr; delete</li>
-          <li><strong>Permissions decided once</strong>, at the gateway; new tools are opt-in</li>
+          <li><a href="https://github.com/kratsg/rucio-mcp"><code>rucio-mcp</code></a> &middot; datasets, 45 tools</li>
+          <li><a href="https://github.com/kratsg/ami-mcp"><code>ami-mcp</code></a> &middot; metadata, 11 tools + a query DSL</li>
+          <li><a href="https://github.com/maniaclab/af-jupyterlab-mcp"><code>af-jupyterlab-mcp</code></a> &middot; notebooks, 22 tools</li>
+          <li><a href="https://github.com/maniaclab/af-filesystem-mcp"><code>af-filesystem-mcp</code></a> &middot; 4 read-only tools</li>
+          <li><a href="https://github.com/bbockelm/golang-htcondor"><code>condor-mcp</code></a> &middot; batch jobs, 25 tools</li>
+          <li><a href="https://github.com/maniaclab/atlas-search-mcp-bridge"><code>atlas-search-mcp-bridge</code></a> &middot; bridge to the <a href="https://gitlab.cern.ch/atlas-search/mcp">ATLAS OpenSearch MCP</a> hosted <a href="https://atlas-search.docs.cern.ch">(internal) online</a></li>
         </ul>
       </div>
       <div class="card teal">
-        <h3><i class="fa-solid fa-user-graduate card-icon" style="font-size:15pt;"></i> Treat the agent like a new student</h3>
+        <h3>The credential layer</h3>
         <ul>
-          <li><strong>Clear, narrow tasks</strong>: "find this dataset", not a raw API</li>
-          <li><strong>A correct manual</strong>: it copies examples verbatim, so test them</li>
-          <li><strong>Useful feedback</strong>: short answers; errors that say what to try next</li>
+          <li><a href="https://github.com/maniaclab/af-mcp-platform"><code>af-mcp-platform</code></a> &middot; gateway + broker</li>
+          <li><a href="https://github.com/maniaclab/voms-token-service"><code>voms-token-service</code></a> &middot; grid proxies</li>
+          <li><a href="https://github.com/maniaclab/krb5-token-service"><code>krb5-token-service</code></a> &middot; Kerberos</li>
+          <li><a href="https://github.com/maniaclab/condor-token-service"><code>condor-token-service</code></a> &middot; HTCondor IDTokens</li>
+          <li><a href="https://github.com/maniaclab/af-credentials"><code>af-credentials</code></a> &middot; the shared verify/redeem library</li>
         </ul>
       </div>
     </div>
-    <blockquote style="font-size:22pt; margin-top:4px;">Interoperable tool interfaces are likely to matter more than model-specific integrations.</blockquote>
   </div>
-  <div class="footnote">Giordon Stark &middot; kratsg &middot; details + ~40 "tried X, found Y" lessons: <a href="https://github.com/kratsg/2026-09-08-pyhepdev-mcp/blob/main/mcp-design-talk.md">mcp-design-talk.md</a> &middot; slides AI-assisted by Claude (Anthropic).</div>
+  <div class="footnote">Live gateway snapshot, 2026&#8209;09&#8209;05 &middot; <a href="https://mcp-portal.af.uchicago.edu/">mcp-portal.af.uchicago.edu</a>.</div>
   <aside class="notes">
-    Security, saved for the end as requested. The key idea: don't ask the model to be
-    trustworthy, make the architecture not care. No tool in our fleet takes a username, so the schema
-    literally can't express "read Bob's files"; who you are comes from the verified identity on every
-    call. No MCP server holds a credential: the broker pulls from a vault, mints something short-lived
-    for exactly one service, it's used once and deleted. And permissions are decided in exactly one
-    place, the gateway, from plain group-based RBAC. A brand new tool stays off until an operator maps it.
-    The other half is agent design, and the best mental model I have is a new grad student. Give it
-    clear, narrow tasks shaped like how a physicist asks, "find this dataset", rather than a raw API
-    dump. Give it a correct manual: the tool descriptions are what it reads, and ours once copied a
-    broken example verbatim, so now we test every example against the live service. And give it
-    useful feedback: keep answers short, since raw API rows swamped the model, and make every error
-    say what to try next so it can recover on its own.
-    Close: interoperable tool interfaces will matter more than model-specific integrations. Design the
-    interface for the model, design the architecture for the credential.
+    Thirty seconds of scale-setting, no code. Seven services behind one gateway, across very
+    different domains: data management, metadata, notebooks, filesystems, batch jobs via Brian
+    Bockelman's condor MCP, and a bridge to CERN's OpenSearch MCP that exists only to translate
+    authentication. Four credential services that are deliberately not MCPs, plus the shared
+    library that ties them together. One platform fronting all of it, for roughly nine hundred
+    AF users.
+    A design point worth saying aloud: when a backend goes down, its tools simply disappear from
+    the tool list instead of failing at call time. The day I first snapshotted this, OpenSearch
+    was down and its fourteen tools were honestly absent. Failure isolation shows up in the tool
+    surface itself.
+  </aside>
+</section>
+
+<!-- WHAT BREAKS AT TEN MCPS (stack: +negative-lessons BACKUP) (PyHEP.dev) -->
+<section>
+<section id="platform-scale">
+  <h2>What breaks at ten MCPs <span class="accent">(that one never sees)</span></h2>
+  <div class="content" style="gap:14px; justify-content:center;">
+    <p class="kicker" style="margin:0;">Design decisions baked into the AF MCP Platform</p>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px 28px;">
+      <ul style="margin:0;">
+        <li><strong>Name collisions</strong>: two MCPs serve a tool with the same name; fix = a prefix per service (<code>rucio-atlas_*</code>, <code>fs_*</code>)</li>
+        <li><strong>Each service gets its own fixed OAuth audience</strong>, pinned in config, never derived from a name that can change</li>
+        <li><strong>Listing needs credentials too</strong>: some MCPs require auth even for <code>tools/list</code>, so the gateway mints one just to enumerate</li>
+      </ul>
+      <ul style="margin:0;">
+        <li><strong>New tools are opt-in</strong>: when an MCP releases a tool, it stays disabled until an operator maps it at the broker</li>
+        <li><strong>Authorization is plain RBAC</strong>: Keycloak group &rarr; permission &rarr; tool</li>
+        <li><strong>A dead backend disappears from <code>tools/list</code></strong> instead of every call failing</li>
+      </ul>
+    </div>
+    <div class="callout">
+      <p class="label">Adding the Nth MCP</p>
+      <p style="margin:0;">Each MCP is added via config (Infrastructure-as-Code). Sometimes it needs a token service, sometimes a bridge, never changes to the MCP itself.</p>
+    </div>
+  </div>
+  <div class="footnote"><a href="https://github.com/maniaclab/af-mcp-platform">af-mcp-platform</a> issues <a href="https://github.com/maniaclab/af-mcp-platform/issues/113"><code>#113</code></a>, <a href="https://github.com/maniaclab/af-mcp-platform/issues/257"><code>#257</code></a>, <a href="https://github.com/maniaclab/af-mcp-platform/issues/121"><code>#121</code></a> &middot; 289 commits, 77 days, 1,337 tests. &darr; more scars</div>
+  <aside class="notes">
+    Everything so far was about one server at a time. At ten, a different class of problem
+    appears, and none of it is in the MCP spec. Quick tour: name collisions, because two backends
+    will eventually serve a tool with the same name and the failure is silent, so every service
+    gets a prefix. OAuth audiences: each service's audience is pinned in config; I learned the
+    hard way not to derive it from a display name, because a rename broke authentication for
+    everything at once. Listing: some MCPs need auth just to enumerate their tools, so the
+    gateway mints a credential for the listing itself. New tools are opt-in: when a backend
+    ships a new tool, it stays disabled until an operator maps it to a permission at the broker.
+    Authorization itself is nothing exotic, plain RBAC from Keycloak groups. And when a backend
+    dies, its tools leave the list rather than erroring one call at a time.
+    The payoff: adding the Nth MCP is configuration, infrastructure-as-code. Sometimes it needs
+    a token service, sometimes a bridge, but you never modify the MCP itself.
+  </aside>
+</section>
+
+<!-- BACKUP: the negative-lesson catalogue, selected -->
+<section id="platform-scale-lessons">
+  <h2>Tried X, discovered Y, ended with Z <span class="accent">&middot; backup</span></h2>
+  <div class="content" style="justify-content:center;">
+    <table>
+      <tr><th>Tried</th><th>Discovered</th><th>Ended with</th></tr>
+      <tr><td>Rust CLI wrapper</td><td>parsing text tables is fragile</td><td>Python + native client</td></tr>
+      <tr><td>Returning raw API rows</td><td>noise swamped the LLM</td><td>curated fields, converted units, next steps</td></tr>
+      <tr><td>Docstrings written from memory</td><td>the LLM reproduced broken examples verbatim</td><td>docstrings tested against the live service</td></tr>
+      <tr><td>Stateful MCP sessions, 2 replicas</td><td>cross-replica "Session terminated"</td><td>stateless HTTP (now the spec default)</td></tr>
+      <tr><td>Dynamic Client Registration</td><td>you maintain a database of client ids, and a restart orphans them all</td><td>CIMD (later adopted by the spec)</td></tr>
+      <tr><td>Groups inside JWT claims</td><td>revocation waits for token expiry</td><td>live IdP lookup, a real kill switch</td></tr>
+    </table>
+  </div>
+  <div class="footnote">Full catalogue with commit hashes: <a href="https://github.com/kratsg/2026-09-08-pyhepdev-mcp/blob/main/mcp-design-talk.md">mcp-design-talk.md</a> &sect;7.2 (about 40 of these).</div>
+  <aside class="notes">
+    Backup, and honestly my favorite slide if there's time. Six of the roughly forty
+    tried-discovered-ended-with lessons in the research document. The top three are interface
+    lessons: wrap the client not the CLI, curate what the model reads, and treat docstrings as
+    code that gets tested against the live service.
+    The bottom three are infrastructure lessons, and two of them, statelessness and client-id
+    metadata documents, I adopted under production pressure months before the MCP spec
+    standardized the same choices. Dynamic Client Registration deserves its line: besides the
+    orphaning, it quietly makes you the owner of a database of client ids, which can grow
+    without bound. Early production pain turned out to be a decent predictor of where the
+    protocol was heading.
+  </aside>
+</section>
+</section>
+
+<!-- OPERATIONS: AI at every layer, HTCondor daily report (Nikhef) -->
+<section id="ops">
+  <p class="kicker">Same context layer, for operators</p>
+  <h2>AI at <span class="accent">every layer</span> of the facility</h2>
+  <div class="content">
+    <div style="display:grid; grid-template-columns: 0.8fr 1.2fr; gap:20px; align-items:start;">
+      <div>
+        <div class="card"><h3><i class="fa-solid fa-user"></i> Analyst-facing</h3>
+          <p style="font-size:13pt;">Find data, generate code, submit, recover, fit. Low autonomy, high convenience.</p></div>
+        <div class="card teal" style="margin-top:10px;"><h3><i class="fa-solid fa-diagram-project"></i> Operations</h3>
+          <p style="font-size:13pt;">Cluster health reports, hold-reason triage, drafted user emails, human-approved.</p></div>
+        <div class="card" style="margin-top:10px;"><h3><i class="fa-solid fa-screwdriver-wrench"></i> Sysadmin-facing</h3>
+          <p style="font-size:13pt;">Config/runbook copilots in the privileged lane; trust earned, actions gated.</p></div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div>
+          <div class="shot filled light" style="min-height:0;">
+            <img src="images/htcondor-daily-report-slack.png" style="max-height:400px; width:auto;" alt="Daily HTCondor cluster report posted to Slack by the AI monitor agent">
+          </div>
+          <p class="shot-hint" style="text-align:center; margin-top:3px; font-size:10.5pt;">Morning report: <strong>448 held of 14,671</strong> (3.1%)</p>
+        </div>
+        <div>
+          <div class="shot filled light" style="min-height:0;">
+            <img src="images/htcondor-email-slack.png" style="max-height:400px; width:auto;" alt="Drafted held-job email posted to Slack, approved by a human, then sent by the agent">
+          </div>
+          <p class="shot-hint" style="text-align:center; margin-top:3px; font-size:10.5pt;">Drafted fix &rarr; human types &ldquo;approve&rdquo; &rarr; sent</p>
+        </div>
+      </div>
+    </div>
+    <div class="callout teal" style="margin-top:12px;">
+      <p>Same context layer, <strong>different autonomy and blast radius</strong> at each level. The facility
+         decides where the human gate sits.</p></div>
+  </div>
+  <aside class="notes">
+    One slide for the operators in the room, because the same idea applies to us, not just to
+    analysts. Think of it as levels of autonomy. Analyst-facing is low autonomy, high convenience.
+    Operations is the middle, and this is running today: a scheduled agent scans HTCondor every
+    morning and posts a Slack report, the state summary, a hold-reason breakdown, top users, jobs
+    held more than seven days, and recommended actions. That morning it was 448 held out of about
+    fourteen and a half thousand.
+    When a user's jobs are stuck, it drafts an email with a specific fix. The real case here was
+    an out-of-memory hold: raise request_memory based on the usage it actually observed against
+    the limit, and write the big outputs to /data. A human replies "approve" in Slack, and only
+    then does it send. Never autonomous. And honestly, there's no HTCondor MCP in this one, just
+    skills around the condor CLI.
+    Sysadmin-facing, the privileged lane, is where trust has to be earned and actions gated. The
+    facility decides where the human gate sits at each level.
+  </aside>
+</section>
+
+<!-- LIVE DEMO: the AF MCP Platform -->
+<section id="demo" class="section-divider" data-state="is-section-divider">
+  <p class="kicker">live &middot; the UChicago AF</p>
+  <h1>Demo</h1>
+  <div style="background:#15171c; color:#e8e8e8; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.25); font-family:var(--font-mono, monospace); padding:14px 22px; margin-top:22px; text-align:left;">
+    <p style="margin:0; font-size:14pt; color:#e8e8e8;"><span style="color:#7fd1b9;">$</span> claude mcp add --transport http atlas-af https://mcp.af.uchicago.edu/mcp</p>
+  </div>
+  <p style="font-size:16pt; margin-top:16px;"><a href="https://mcp-portal.af.uchicago.edu/">mcp-portal.af.uchicago.edu</a></p>
+  <aside class="notes">
+    Switch to the browser and terminal here. Keep it to about five minutes.
+    That one line is the whole client-side setup: add the facility as an MCP server, log in
+    through the browser with the facility identity, and the assistant sees the tools I'm
+    allowed to use, nothing else.
+    Run sheet, adjust live: the portal landing page and the services behind it; connect a client
+    and log in; one read, like finding a dataset; one batch call through condor-mcp; and one
+    call that policy denies, so you can see the refusal and the audit record.
+    If the network fails me, the trace slide and its step-by-step deep-dive are the fallback.
+  </aside>
+</section>
+
+<!-- INTERFACES THAT TRAVEL (stack: +spec scorecard BACKUP) (PyHEP.dev) -->
+<section>
+<section id="interop">
+  <h2>Interfaces that travel</h2>
+  <div class="content" style="gap:16px; justify-content:center;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:22px;">
+      <div class="card">
+        <h3><i class="fa-solid fa-robot card-icon" style="font-size:15pt;"></i> Across LLM providers</h3>
+        <ul>
+          <li>Design for the <strong>least-capable LLM client</strong>: e.g. Claude Desktop had no OAuth discovery, so I added personal access tokens; gemini-cli choked on an OAuth metadata fallback, so I deleted it</li>
+          <li>Standard OAuth, standard transports, no provider-specific hooks</li>
+        </ul>
+      </div>
+      <div class="card teal">
+        <h3><i class="fa-solid fa-atom card-icon" style="font-size:15pt;"></i> Across experiments</h3>
+        <ul>
+          <li>rucio-mcp already serves ATLAS, CMS, DUNE, ESCAPE: the domain layer is VO-agnostic</li>
+          <li>Transplant the <strong>shape</strong> (broker + custodians + config-only services), not the CERN-specific code</li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout">
+      <p style="margin:0;">Interoperable tool interfaces are likely to matter more than LLM-specific integrations.</p>
+    </div>
+  </div>
+  <div class="footnote">&darr; how my choices scored against the evolving MCP spec</div>
+  <aside class="notes">
+    The abstract's closing claim, made concrete. Across providers: the discipline is designing
+    for the least-capable client. I had a genuinely cleaner design for routing based on OAuth
+    scopes, fully written up, and I shelved it because only one client on the market supports
+    the feature; the write-up is committed next to the code. Same story with the OAuth metadata
+    fallback I deleted after a different client choked on it. Standard auth, standard
+    transports, nothing provider-specific: that's what "works across providers" costs.
+    Across experiments: rucio-mcp is already multi-VO because Rucio is, and the whole facility
+    shape, broker, custodians, config-only services, transplants to any lab. What doesn't
+    transplant is the CERN-specific plumbing, and that's fine: it's all behind one provider
+    interface and per-service config.
+    If you take one sentence home, take the abstract's: interoperable tool interfaces will
+    matter more than model-specific integrations.
+  </aside>
+</section>
+
+<!-- BACKUP: scorecard against the MCP specification -->
+<section id="interop-spec">
+  <h2>Scored against the MCP spec <span class="accent">&middot; backup</span></h2>
+  <div class="content" style="justify-content:center;">
+    <table>
+      <tr><th>My choice</th><th>The spec (2026-07-28)</th><th>Verdict</th></tr>
+      <tr><td>Stateless HTTP, state as explicit handles</td><td>protocol sessions removed</td><td>compliant / anticipated it</td></tr>
+      <tr><td>CIMD instead of Dynamic Client Registration</td><td>DCR deprecated for CIMD</td><td>compliant / anticipated it</td></tr>
+      <tr><td>Tools only; no sampling, roots, logging</td><td>all three deprecated</td><td>compliant / anticipated it</td></tr>
+      <tr><td>Exchange tokens, audience-validate everywhere</td><td>token passthrough forbidden (MUST)</td><td>compliant</td></tr>
+      <tr><td>Markdown-only outputs, no <code>outputSchema</code></td><td>structured content recommended</td><td>wrong; retrofitting now</td></tr>
+      <tr><td>No read-only / destructive tool annotations</td><td>annotations recommended</td><td>wrong; the gateway must keep its own list of which tools write</td></tr>
+    </table>
+  </div>
+  <div class="footnote">Spec: <a href="https://modelcontextprotocol.io/specification/2026-07-28">modelcontextprotocol.io/specification/2026-07-28</a> &middot; full comparison in <a href="https://github.com/kratsg/2026-09-08-pyhepdev-mcp/blob/main/mcp-design-talk.md">mcp-design-talk.md</a> &sect;6.3.</div>
+  <aside class="notes">
+    Backup scorecard, useful for the "is MCP stable enough to build on" question. Three of my
+    production-driven choices were later standardized: statelessness, client-id metadata
+    documents, and betting on tools as the durable primitive. The auth model is compliant with
+    the spec's strictest MUSTs, including the token-passthrough prohibition, which my broker
+    architecture essentially exists to satisfy.
+    And two honest misses: I returned markdown only, no output schemas and no tool annotations,
+    and the platform paid for both, a metering double-count bug and a hand-maintained read/write
+    list. The correction is authoring conventions and a retrofit. If you start tomorrow, start
+    with structured outputs.
+  </aside>
+</section>
+</section>
+
+<!-- CLOSE -->
+<section id="close">
+  <h2>Generic LLM &rarr; <span class="accent">facility-aware</span> collaborator</h2>
+  <div class="content" style="gap:18px; justify-content:center;">
+    <div style="display:grid; grid-template-columns: 1.15fr 1fr; gap:28px; align-items:start;">
+      <div>
+        <p>Swap the model and harness freely. The facility&rsquo;s <strong>context, identity, and credentials</strong> are what
+           make it useful and safe, and that layer ports to the next facility.</p>
+        <p style="margin-top:14px; font-size:14pt;"><strong>Still hard:</strong>
+           <span class="text-muted">structured outputs and read/write tool annotations (retrofitting) &middot; more brokered backends (PanDA next) &middot; testing against the live services, not mocks</span></p>
+      </div>
+      <div class="callout teal">
+        <p class="label">Pointers</p>
+        <ul style="margin:2px 0;">
+          <li><a href="https://github.com/maniaclab/af-mcp-platform">maniaclab/af-mcp-platform</a></li>
+          <li><a href="https://github.com/maniaclab/condor-token-service">condor-token-service</a> &middot; <a href="https://github.com/bbockelm/golang-htcondor">condor-mcp</a></li>
+          <li><a href="https://github.com/kratsg/rucio-mcp">rucio-mcp</a> &middot; <a href="https://github.com/kratsg/ami-mcp">ami-mcp</a> &middot; <a href="https://github.com/usatlas/marketplace">usatlas/marketplace</a></li>
+        </ul>
+      </div>
+    </div>
+    <blockquote style="font-size:22pt; margin-top:4px;">Design the interface for the model; design the architecture for the credential.</blockquote>
+  </div>
+  <div class="footnote">Giordon Stark &middot; kratsg &middot; HTCondor Workshop Autumn 2026 &middot; ~40 &ldquo;tried X, found Y&rdquo; lessons: <a href="https://github.com/kratsg/2026-10-01-htcondor-eu/blob/main/mcp-design-talk.md">mcp-design-talk.md</a> &middot; slides AI-assisted by Claude (Anthropic).</div>
+  <aside class="notes">
+    To close. Swap the model and the harness freely; what makes an agent useful and safe on a
+    shared facility is the layer we run: context, identity, and credentials. And that layer
+    ports. The shape, a gateway, a broker, custodians next to each root secret, services added
+    by config, transplants to the next facility.
+    What's still hard, honestly: I returned markdown only, no structured outputs and no
+    read/write annotations, and I'm retrofitting both. More backends behind the broker, PanDA is
+    next. And testing against the real services, because mocks never caught the failures that
+    actually bit me.
+    The sticky-note version: design the interface for the model, design the architecture for
+    the credential. Thanks, happy to take questions.
   </aside>
 </section>
 
@@ -453,7 +896,7 @@
 
 <!-- Build stamp: deploy.yml rewrites the inner text to "<short-sha> · <date>" at publish time;
      stays "dev" for local viewing. Top-right, links to the repo; slide number is bottom-left. -->
-<div class="build-stamp"><a href="https://github.com/kratsg/2026-09-24-uhawaii-colloquium-rap" id="buildstamp" target="_blank" rel="noopener">dev</a></div>
+<div class="build-stamp"><a href="https://github.com/kratsg/2026-10-01-htcondor-eu" id="buildstamp" target="_blank" rel="noopener">dev</a></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@6.0.1/dist/reveal.js"></script>

@@ -88,19 +88,28 @@
 <section id="arch-swap">
   <p class="kicker">Where the work is</p>
   <h2>Swap the model freely; <span class="accent">context</span> makes it useful</h2>
-  <div class="content" style="justify-content:center; gap:22px;">
+  <div class="content" style="justify-content:center; gap:16px;">
     <div style="display:grid; grid-template-columns: 1fr 1fr 1.25fr; gap:18px; align-items:stretch;">
       <div class="node slate" style="font-size:16pt; padding:16px;">Model<span class="sub">frontier API &middot; or self-hosted open weights</span></div>
       <div class="node slate" style="font-size:16pt; padding:16px;">Harness<span class="sub">Claude Code &middot; Codex &middot; Copilot</span></div>
       <div class="node fill" style="font-size:16pt; padding:16px;">Facility context &amp; tools<span class="sub">data, storage, batch, identity, fits &middot; via MCP servers</span></div>
     </div>
     <div class="callout">
-      <p style="margin:0;">The first two churn monthly and are interchangeable. The limiting factor is rarely the model: it's
+      <p style="margin:0;">The first two change week to week. That isn't what limits agentic workflows: it's
          <strong>reliable, secure access</strong> to the tools, data, and identities users already have.</p>
     </div>
-    <div class="callout teal">
-      <p style="margin:0;">&ldquo;Where should my job outputs go?&rdquo; A generic model says your home area, and the quota fills in minutes.
-         One that knows the facility says fast local scratch. <strong>Same model, more context.</strong></p>
+    <p class="text-center" style="margin:4px 0 0 0; font-size:17pt;">Same prompt: <em>&ldquo;Where should my job outputs go?&rdquo;</em></p>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:22px;">
+      <div class="card">
+        <h3 style="font-size:15pt;"><i class="fa-solid fa-robot card-icon" style="font-size:14pt;"></i> Generic model</h3>
+        <p style="font-size:14pt; margin:0;"><em>&ldquo;Next to the job, in your home area.&rdquo;</em></p>
+        <p class="text-muted" style="font-size:12.5pt; margin:6px 0 0 0;">&rarr; big files fill the home quota in minutes</p>
+      </div>
+      <div class="card teal">
+        <h3 style="font-size:15pt;"><i class="fa-solid fa-building-columns card-icon" style="font-size:14pt;"></i> Facility-aware model</h3>
+        <p style="font-size:14pt; margin:0;"><em>&ldquo;Big outputs to fast local scratch; small summaries in your backed-up home.&rdquo;</em></p>
+        <p class="text-muted" style="font-size:12.5pt; margin:6px 0 0 0;">&rarr; <strong>same model, more context</strong></p>
+      </div>
     </div>
   </div>
   <div class="footnote">Everything here runs in production at the UChicago ATLAS Analysis Facility &middot; <a href="https://mcp-portal.af.uchicago.edu/">mcp-portal.af.uchicago.edu</a></div>
@@ -112,7 +121,8 @@
     third block is the only durable, tractable piece, and it's the one we, the people running the
     facility, control. Furnishing context is an infrastructure problem, not a prompt problem, which
     is why I think it belongs in this room.
-    A concrete example. Ask a generic model where your batch job's outputs should go and it'll say
+    The model and the harness change week to week, and that's fine; they're not what holds us back.
+    A concrete example, same prompt to both. Ask a generic model where your batch job's outputs should go and it'll say
     next to the job, your home area, and the big files blow your quota in minutes. A model that knows
     the facility sends big outputs to fast local scratch and keeps small summaries in the backed-up
     home. The model didn't get smarter; we gave it context. And the flip side: without context it
@@ -121,7 +131,8 @@
   </aside>
 </section>
 
-<!-- WHAT IS MCP (intro, from the PyHEP.dev deck) -->
+<!-- WHAT IS MCP (stack: +build-one BACKUP) (PyHEP.dev) -->
+<section>
 <section id="what-is-mcp">
   <h2>What is the Model Context Protocol?</h2>
   <div class="content" style="justify-content:center; gap:26px;">
@@ -153,6 +164,55 @@
     model can call, described by a name, a schema, and a docstring. Not prompt engineering, not a
     custom model: ordinary interface design for an unusual caller.
   </aside>
+</section>
+
+<!-- BACKUP: what an MCP server around an existing Python project looks like -->
+<section id="what-is-mcp-build">
+  <h2>Around an existing Python project <span class="accent">&middot; backup</span></h2>
+  <div class="content" style="gap:14px;">
+    <div style="display:grid; grid-template-columns: 1.1fr 1fr; gap:24px; align-items:start;">
+      <div>
+        <pre><code class="block"><span class="kw">from</span> fastmcp <span class="kw">import</span> FastMCP
+<span class="kw">from</span> rucio.client <span class="kw">import</span> Client
+
+mcp = FastMCP(<span class="cmt">"rucio"</span>)
+client = Client()
+
+<span class="kw">@mcp.tool</span>()
+<span class="kw">def</span> list_dids(scope: str,
+              pattern: str = <span class="cmt">"*"</span>) -&gt; str:
+    <span class="cmt">"""Search datasets in a scope by wildcard.
+
+    Use a narrow pattern; results are paginated.
+    """</span>
+    <span class="kw">return</span> ", ".join(
+        client.list_dids(scope, {"name": pattern}))
+
+mcp.run()</code></pre>
+        <p class="text-muted" style="font-size:12pt; margin-top:4px;">rucio-mcp started from this barebones structure</p>
+      </div>
+      <div>
+        <ul style="margin-top:6px;">
+          <li>Everything the LLM sees is right here: <strong>name</strong> <code>list_dids</code>, <strong>schema</strong> <code>scope: str, pattern: str = "*"</code>, <strong>description</strong> = the docstring</li>
+          <li>Wrap <code>rucio.client</code>, not the CLI: structured data in, curated text out</li>
+          <li>Start on stdio on your laptop; add HTTP when a facility hosts it</li>
+          <li><code>fastmcp</code> handles the JSON-RPC; you only write the function</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <aside class="notes">
+    Backup, for the "how do I start" question. This is the barebones structure rucio-mcp started
+    from: FastMCP, the native Rucio client, one decorated function. The decorator turns the
+    signature into the JSON schema and the docstring into the description. Point at the left and
+    the right together: the name, the two typed parameters, and that docstring are literally
+    everything the LLM knows about this tool, which is why the docstring is API surface.
+    Two pieces of advice if you do this tomorrow: wrap the client library, not the command-line
+    tool, because you want structured data on your side of the boundary; and start with stdio
+    on your laptop, where credentials come from your environment like they do for any script.
+    Hosting it for other people is where the rest of this talk begins.
+  </aside>
+</section>
 </section>
 
 <!-- CAPABILITIES AND KNOWLEDGE: MCP = hands, skills = expertise (AMG Weekly slide 7) -->
@@ -222,10 +282,11 @@
 </section>
 
 
-<!-- THE SIMPLE PICTURE vs PRODUCTION (PyHEP.dev) -->
+<section>
+<!-- TUTORIAL vs PRODUCTION + what is deployed (stack: +architecture overview) (PyHEP.dev / Nikhef) -->
 <section id="naive-vs-real">
-  <h2>The simple picture, and what I actually run</h2>
-  <div class="content" style="justify-content:center; gap:26px;">
+  <h2>Every MCP tutorial vs. <span class="accent">the UChicago AF</span></h2>
+  <div class="content" style="justify-content:center; gap:16px;">
     <div>
       <p style="margin:0 0 8px 0;"><span class="tag teal">every MCP tutorial</span></p>
       <div style="display:flex; align-items:center; gap:14px; max-width:820px;">
@@ -254,21 +315,77 @@
         <div class="node" style="flex:1.3; font-size:12.5pt; padding:8px 6px;">Scientific service<span class="sub">grid &middot; KDC &middot; schedd</span></div>
       </div>
     </div>
-    <div class="callout">
-      <p class="label">The point</p>
-      <p style="margin:0;">The limiting factor is rarely the LLM. It's reliable, secure access to what scientists already use.</p>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:22px;">
+      <div class="card">
+        <h3 style="font-size:15pt;">The MCP layer</h3>
+        <ul style="font-size:12.5pt;">
+          <li><a href="https://github.com/kratsg/rucio-mcp"><code>rucio-mcp</code></a> &middot; datasets, 45 tools</li>
+          <li><a href="https://github.com/kratsg/ami-mcp"><code>ami-mcp</code></a> &middot; metadata, 11 tools + a query DSL</li>
+          <li><a href="https://github.com/maniaclab/af-jupyterlab-mcp"><code>af-jupyterlab-mcp</code></a> &middot; notebooks, 22 tools</li>
+          <li><a href="https://github.com/maniaclab/af-filesystem-mcp"><code>af-filesystem-mcp</code></a> &middot; 4 read-only tools</li>
+          <li><a href="https://github.com/bbockelm/golang-htcondor"><code>condor-mcp</code></a> &middot; batch jobs, 25 tools</li>
+          <li><a href="https://github.com/maniaclab/atlas-search-mcp-bridge"><code>atlas-search-mcp-bridge</code></a> &middot; to CERN's ATLAS OpenSearch MCP</li>
+        </ul>
+      </div>
+      <div class="card teal">
+        <h3 style="font-size:15pt;">The credential layer</h3>
+        <ul style="font-size:12.5pt;">
+          <li><a href="https://github.com/maniaclab/af-mcp-platform"><code>af-mcp-platform</code></a> &middot; gateway + broker</li>
+          <li><a href="https://github.com/maniaclab/voms-token-service"><code>voms-token-service</code></a> &middot; grid proxies</li>
+          <li><a href="https://github.com/maniaclab/krb5-token-service"><code>krb5-token-service</code></a> &middot; Kerberos</li>
+          <li><a href="https://github.com/maniaclab/condor-token-service"><code>condor-token-service</code></a> &middot; HTCondor IDTokens</li>
+          <li><a href="https://github.com/maniaclab/af-credentials"><code>af-credentials</code></a> &middot; shared verify/redeem library</li>
+        </ul>
+      </div>
     </div>
   </div>
+  <div class="footnote">7 services behind one gateway &middot; 124 tools &middot; 6 credential types &middot; ~900 AF users &middot; live gateway snapshot, 2026&#8209;09&#8209;05 &middot; &darr; architecture overview</div>
   <aside class="notes">
     Start with the three-box diagram every MCP tutorial draws, because it's true: agent, server,
-    backend, and the SDK makes that a weekend of work. Then reveal the second row: this is the
-    same tool call as it actually runs in production. The user authenticated through Keycloak,
-    the agent holds a personal access token, the gateway authenticates and authorizes once,
-    a broker mints a short-lived identity token for exactly one backend, the backend redeems it
-    for a real grid credential from a custodial service, and only then does Rucio hear about it.
-    Every box in that second row exists because something broke without it. That's the talk in
-    one line: design the interface for the model, design the architecture for the credential.
+    backend, and the SDK makes that a weekend of work. The second row is the same tool call as
+    it actually runs in production. The user authenticated through Keycloak, the agent holds a
+    personal access token, the gateway authenticates and authorizes once, a broker mints a
+    short-lived identity token for exactly one backend, the backend redeems it for a real
+    credential from a custodial service, and only then does the schedd or Rucio hear about it.
+    Every box in that second row exists because something broke without it.
+    Below is what's actually deployed. The MCP layer: six services across data management,
+    metadata, notebooks, filesystems, batch jobs through Brian Bockelman's condor MCP, and a
+    bridge to CERN's OpenSearch MCP that exists only to translate authentication. The credential
+    layer: the platform itself, three token services that are deliberately not MCPs, and the
+    shared library that ties them together. 124 tools, for roughly nine hundred AF users.
+    One design point: when a backend goes down, its tools disappear from the tool list instead
+    of failing at call time. The day I snapshotted this, OpenSearch was down and its fourteen
+    tools were honestly absent.
   </aside>
+</section>
+
+<!-- OVERVIEW: the credential-brokered gateway as one figure (Nikhef) -->
+<section id="gateway-overview">
+  <p class="kicker">Overview &middot; the platform boundary</p>
+  <h2>A credential-brokered <span class="accent">MCP gateway</span></h2>
+  <div class="content">
+    <p>One endpoint in front of the facility&rsquo;s services. The LLM client <strong>never holds raw
+       credentials</strong>; the broker authenticates the user, mints per-service credentials, and
+       audits every tool call.</p>
+    <div style="text-align:center; margin:10px 0;">
+      <img src="images/NEW-af-mcp-arch.svg" alt="Claude, Gemini or any MCP client to the mcp.af.uchicago.edu front door (oauth2-proxy, AF Keycloak OIDC), through a FastMCP aggregator and AF credential broker (FastAPI /v1) doing identity, authZ, credential brokering and audit, fanning out to rucio-mcp, ami-mcp, openmagic, panda-mcp, condor-mcp, gitlab-mcp, jupyter-control and an Nth backend with no code change" style="max-width:100%; max-height:330px;">
+    </div>
+    <div class="callout teal" style="margin-top:6px;">
+      <p>Identity, authZ, credential brokering, and audit in <strong>one place</strong>: the same boundary a
+         facility wants in front of its services, with or without AI.</p></div>
+  </div>
+  <div class="footnote"><a href="https://github.com/kratsg/rucio-mcp">rucio-mcp</a> &middot; <a href="https://github.com/kratsg/ami-mcp">ami-mcp</a> &middot; <a href="https://github.com/atlas-outreach-data-tools/atlasopenmagic-mcp">atlasopenmagic</a> &middot; <a href="https://panda-wms.readthedocs.io/en/latest/advanced/mcp.html">panda-mcp</a> &middot; <a href="https://indico.cern.ch/event/1471803/contributions/6967102/">condor-mcp</a> (Bockelman, CHEP&nbsp;2026).</div>
+  <aside class="notes">
+    The same thing as one architecture picture, if you want the overview. The client, Claude,
+    Gemini, whatever, holds only a bearer token. It hits the front door, mcp.af.uchicago.edu,
+    which is oauth2-proxy in front of the AF's Keycloak. Behind that, the FastMCP aggregator and
+    the credential broker do identity, authorization, credential brokering and audit, and fan out
+    to the MCP servers. The broker is the only thing that ever touches raw x509 or IAM material.
+    Adding the Nth backend is no code change. It's deployed with Flux and Helm.
+    The point for this room: that boundary is the one you'd want in front of your services
+    anyway, AI or not.
+  </aside>
+</section>
 </section>
 
 <!-- TOPOLOGY: one MCP, many, or a gateway? (Nikhef) -->
@@ -322,7 +439,7 @@
         <p style="font-size:12pt;"><i class="fa-solid fa-check text-teal"></i> one identity &nbsp; <i class="fa-solid fa-triangle-exclamation text-maroon"></i> token sprawl / choke point</p></div>
     </div>
     <div class="callout" style="margin-top:14px;">
-      <p style="margin:0;">We run the <strong>gateway</strong>: one identity, one place to authorize and audit. The rest of the talk is paying down its costs.</p>
+      <p style="margin:0;">We run the <strong>gateway</strong>: one identity, one place to authorize and audit. Next: how we handle token sprawl and the choke point.</p>
     </div>
     <p class="text-muted" style="font-size:12.5pt; margin-top:10px;"><a href="https://gofastmcp.com/servers/composition">FastMCP</a> composition = one auth provider per server; that constraint drives a lot of the design.</p>
   </div>
@@ -334,7 +451,7 @@
     authorize and audit every call.
     We went with the gateway. It has two costs you can see on the card: token sprawl, because
     every backend needs its own credential, and a choke point, because everything goes through
-    it. The rest of the talk is mostly how we pay those down. One practical constraint pushed
+    it. The next few slides are how we handle those two. One practical constraint pushed
     us there: FastMCP composition gives you one auth provider per server, so you can't just
     mount ten servers with ten different auth stories into one process.
   </aside>
@@ -390,7 +507,7 @@
     </div>
     <div class="callout" style="margin-top:18px;">
       <p style="margin:0;">The agent speaks <strong>intent</strong> ("get this dataset", "run on the cluster"); the facility wires the backend.
-         Adding the Nth MCP server is <strong>config</strong>, never a change to the server itself.</p>
+         <strong>Infrastructure&#8209;as&#8209;Config</strong>: the Nth MCP server is Helm values on Kubernetes, never a change to the server.</p>
     </div>
   </div>
   <div class="footnote"><a href="https://mcp-portal.af.uchicago.edu/">mcp-portal.af.uchicago.edu</a> &middot; the portal landing page's own animation (<a href="https://github.com/maniaclab/af-mcp-platform">af-mcp-platform</a>).</div>
@@ -407,7 +524,8 @@
     credential is minted short-lived for exactly one service, used once, and deleted.
     And the design idea underneath, which I showed at Nikhef: the agent speaks intent, "get this
     dataset", "run this on the cluster", and the facility wires that to Rucio, HTCondor, whatever
-    the backend is. Adding the next MCP server is configuration, never a change to the server.
+    the backend is. And it's infrastructure-as-config: adding the next MCP server is an entry in
+    the Helm values, deployed like anything else on Kubernetes, never a change to the server.
   </aside>
 </section>
 
@@ -594,58 +712,10 @@ mint_ticket(claims[<span class="cmt">"sub"</span>])
 </section>
 </section>
 
-<!-- ONE FACILITY, ONE SUMMER (PyHEP.dev) -->
-<section id="ecosystem">
-  <h2>One facility, one summer <span class="accent">&middot; all in production</span></h2>
-  <div class="content" style="gap:18px;">
-    <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:18px;">
-      <div class="stat"><p class="num">7</p><p class="label">services behind one gateway</p></div>
-      <div class="stat"><p class="num">124</p><p class="label">tools</p></div>
-      <div class="stat"><p class="num">6</p><p class="label">credential types</p></div>
-      <div class="stat"><p class="num">~900</p><p class="label">users on the UChicago ATLAS AF</p></div>
-    </div>
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:22px;">
-      <div class="card">
-        <h3>The MCP layer</h3>
-        <ul>
-          <li><a href="https://github.com/kratsg/rucio-mcp"><code>rucio-mcp</code></a> &middot; datasets, 45 tools</li>
-          <li><a href="https://github.com/kratsg/ami-mcp"><code>ami-mcp</code></a> &middot; metadata, 11 tools + a query DSL</li>
-          <li><a href="https://github.com/maniaclab/af-jupyterlab-mcp"><code>af-jupyterlab-mcp</code></a> &middot; notebooks, 22 tools</li>
-          <li><a href="https://github.com/maniaclab/af-filesystem-mcp"><code>af-filesystem-mcp</code></a> &middot; 4 read-only tools</li>
-          <li><a href="https://github.com/bbockelm/golang-htcondor"><code>condor-mcp</code></a> &middot; batch jobs, 25 tools</li>
-          <li><a href="https://github.com/maniaclab/atlas-search-mcp-bridge"><code>atlas-search-mcp-bridge</code></a> &middot; bridge to the <a href="https://gitlab.cern.ch/atlas-search/mcp">ATLAS OpenSearch MCP</a> hosted <a href="https://atlas-search.docs.cern.ch">(internal) online</a></li>
-        </ul>
-      </div>
-      <div class="card teal">
-        <h3>The credential layer</h3>
-        <ul>
-          <li><a href="https://github.com/maniaclab/af-mcp-platform"><code>af-mcp-platform</code></a> &middot; gateway + broker</li>
-          <li><a href="https://github.com/maniaclab/voms-token-service"><code>voms-token-service</code></a> &middot; grid proxies</li>
-          <li><a href="https://github.com/maniaclab/krb5-token-service"><code>krb5-token-service</code></a> &middot; Kerberos</li>
-          <li><a href="https://github.com/maniaclab/condor-token-service"><code>condor-token-service</code></a> &middot; HTCondor IDTokens</li>
-          <li><a href="https://github.com/maniaclab/af-credentials"><code>af-credentials</code></a> &middot; the shared verify/redeem library</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-  <div class="footnote">Live gateway snapshot, 2026&#8209;09&#8209;05 &middot; <a href="https://mcp-portal.af.uchicago.edu/">mcp-portal.af.uchicago.edu</a>.</div>
-  <aside class="notes">
-    Thirty seconds of scale-setting, no code. Seven services behind one gateway, across very
-    different domains: data management, metadata, notebooks, filesystems, batch jobs via Brian
-    Bockelman's condor MCP, and a bridge to CERN's OpenSearch MCP that exists only to translate
-    authentication. Four credential services that are deliberately not MCPs, plus the shared
-    library that ties them together. One platform fronting all of it, for roughly nine hundred
-    AF users.
-    A design point worth saying aloud: when a backend goes down, its tools simply disappear from
-    the tool list instead of failing at call time. The day I first snapshotted this, OpenSearch
-    was down and its fourteen tools were honestly absent. Failure isolation shows up in the tool
-    surface itself.
-  </aside>
-</section>
-
-<!-- WHAT BREAKS AT TEN MCPS (stack: +negative-lessons BACKUP) (PyHEP.dev) -->
+<!-- LESSONS LEARNED (stack: what breaks at ten MCPs, +interface/errors/context DEEP-DIVES, +negative-lessons BACKUP) (PyHEP.dev) -->
 <section>
 <section id="platform-scale">
+  <p class="kicker">Lessons learned &middot; &darr; four more</p>
   <h2>What breaks at ten MCPs <span class="accent">(that one never sees)</span></h2>
   <div class="content" style="gap:14px; justify-content:center;">
     <p class="kicker" style="margin:0;">Design decisions baked into the AF MCP Platform</p>
@@ -663,7 +733,7 @@ mint_ticket(claims[<span class="cmt">"sub"</span>])
     </div>
     <div class="callout">
       <p class="label">Adding the Nth MCP</p>
-      <p style="margin:0;">Each MCP is added via config (Infrastructure-as-Code). Sometimes it needs a token service, sometimes a bridge, never changes to the MCP itself.</p>
+      <p style="margin:0;">Each MCP is added via config (Infrastructure&#8209;as&#8209;Config: Helm charts on Kubernetes). Sometimes it needs a token service, sometimes a bridge, never changes to the MCP itself.</p>
     </div>
   </div>
   <div class="footnote"><a href="https://github.com/maniaclab/af-mcp-platform">af-mcp-platform</a> issues <a href="https://github.com/maniaclab/af-mcp-platform/issues/113"><code>#113</code></a>, <a href="https://github.com/maniaclab/af-mcp-platform/issues/257"><code>#257</code></a>, <a href="https://github.com/maniaclab/af-mcp-platform/issues/121"><code>#121</code></a> &middot; 289 commits, 77 days, 1,337 tests. &darr; more scars</div>
@@ -680,6 +750,150 @@ mint_ticket(claims[<span class="cmt">"sub"</span>])
     dies, its tools leave the list rather than erroring one call at a time.
     The payoff: adding the Nth MCP is configuration, infrastructure-as-code. Sometimes it needs
     a token service, sometimes a bridge, but you never modify the MCP itself.
+  </aside>
+</section>
+
+<!-- LESSON (PyHEP.dev): interface-problem -->
+<section id="interface-problem">
+  <p class="kicker">Lessons learned &middot; deep-dive</p>
+  <h2>An existing API is not an agent interface</h2>
+  <div class="content" style="gap:16px;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:22px; align-items:start;">
+      <div>
+        <p style="margin:0 0 6px 0;"><span class="tag">bad: the raw API dump</span></p>
+        <pre style="margin:0;"><code class="block" style="font-size:11.5pt; border-left-color:#a33;">{"logicalDatasetName": "mc23_13p6TeV.601229...",
+ "crossSection": "0.729", "crossSection_unit": "nb",
+ "genFiltEff": "1.0", "kFactor": "1.0",
+ "principalPhysicsGroup": "...", "prodsysStatus":
+ "...", ...95 more fields, duplicate rows...}</code></pre>
+        <p class="text-muted" style="font-size:11.5pt; margin:4px 0 0 0;">every field, no units help, and the same for each of 50 datasets</p>
+      </div>
+      <div>
+        <p style="margin:0 0 6px 0;"><span class="tag teal">good: markdown-friendly, LLM-friendly</span></p>
+        <pre style="margin:0;"><code class="block" style="font-size:11.5pt; border-left-color:var(--teal);">**mc23_13p6TeV.601229** (PhPy8EG ttbar) &middot; VALID
+Cross-section: 729 pb (0.729 nb &times; 1000)
+Events: 2M &middot; k-factor: 1.0
+
+---
+**Next steps:**
+- ami_get_dataset_prov for provenance
+- rucio_list_dataset_replicas to locate copies</code></pre>
+        <p class="text-muted" style="font-size:11.5pt; margin:4px 0 0 0;">~15 curated fields, units converted in the open, follow-up tools named</p>
+      </div>
+    </div>
+    <div class="callout">
+      <p style="margin:0;">The docstrings keep getting fixed against each tool's actual behavior, to teach the LLM how to use it correctly. The LLM reproduces examples verbatim, so a doc bug is a behavior bug.</p>
+    </div>
+  </div>
+  <div class="footnote">Sketch abridged from real <a href="https://github.com/kratsg/ami-mcp">ami-mcp</a> output; the curation commit is <a href="https://github.com/kratsg/ami-mcp/commit/901f339"><code>901f339</code></a> "optimize MCP tools for LLM usefulness".</div>
+  <aside class="notes">
+    This is the first lesson chronologically, shown as bad versus good. ami-mcp wraps a
+    twenty-year-old metadata service. The naive wrapper worked and passed its mocked tests, and
+    the output was unusable: a hundred raw fields per dataset, cross-sections in nanobarn with
+    no hint, duplicate rows, multiplied by every dataset in the answer. The fix commit is
+    literally titled "optimize MCP tools for LLM usefulness": pick the fifteen fields an analyst
+    would pick, convert units visibly so the model can't silently mix nb and pb, deduplicate,
+    and end every result with named follow-up tools so the model knows where to go next.
+    And the callout: the docstrings keep getting fixed against the tools' real behavior. AMI is
+    the one server where I teach the model a query language, so the documentation is executable;
+    when a documented example was wrong, the model reproduced the wrong syntax verbatim, and I
+    fixed the docs the way you fix code, against the live service.
+  </aside>
+</section>
+
+<!-- LESSON (PyHEP.dev): p-errors -->
+<section id="p-errors">
+  <p class="kicker">Lessons learned &middot; deep-dive</p>
+  <h2>Errors are the agent's control flow</h2>
+  <div class="content" style="gap:16px;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:22px; align-items:start;">
+      <div>
+        <p style="margin:0 0 6px 0;"><span class="tag">bad: what the agent sees by default</span></p>
+        <pre style="margin:0;"><code class="block" style="font-size:12pt; border-left-color:#a33;">Traceback (most recent call last):
+  File ".../replicaclient.py", line 158, ...
+rucio.common.exception.DataIdentifierNotFound:
+  Data identifier 'user.gstark:mydata'
+  not found</code></pre>
+        <p class="text-muted" style="font-size:11.5pt; margin:4px 0 0 0;">a dead end: nothing tells the agent what to try next</p>
+      </div>
+      <div>
+        <p style="margin:0 0 6px 0;"><span class="tag teal">good: what rucio-mcp returns instead</span></p>
+        <pre style="margin:0;"><code class="block" style="font-size:12pt; border-left-color:var(--teal);">Error: Data identifier
+'user.gstark:mydata' not found
+
+**Recovery:** The DID does not exist in
+Rucio. Use `rucio_list_dids` with a
+wildcard pattern to search for it.</code></pre>
+        <p class="text-muted" style="font-size:11.5pt; margin:4px 0 0 0;">returned to the agent, not raised into server logs; the next tool is named</p>
+      </div>
+    </div>
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:22px;">
+      <p style="margin:0; font-size:13.5pt;">Empty results carry the same routing hints. The error categories also feed my monitoring, so I can see which tools confuse the agent.</p>
+      <div class="callout teal">
+        <p style="margin:0; font-size:13pt;">MCP results have an <code>isError</code> flag so clients can tell failure from success. I didn't set it at first; do both.</p>
+      </div>
+    </div>
+  </div>
+  <div class="footnote">The classifier behind the right panel: <a href="https://github.com/kratsg/rucio-mcp/blob/main/src/rucio_mcp/tools/_helpers.py">rucio-mcp <code>tools/_helpers.py</code></a> (<code>classify_error</code>).</div>
+  <aside class="notes">
+    The consumer of an MCP is probabilistic: it course-corrects from what it reads, so an error
+    message is not diagnostics, it's the next instruction. Left panel: the default, a raw
+    exception. Best case the agent guesses; worst case it retries the same call. Right panel:
+    what rucio-mcp returns for the same failure. The error comes back to the agent as a normal
+    result rather than being raised into the server logs, and the recovery line names the exact
+    next tool, so most failures heal themselves inside the loop. Empty results, which are the
+    most common silent failure, get the same treatment.
+    Two housekeeping notes: the same error categories feed my monitoring, so I can literally
+    chart which tools confuse the agent; and MCP has a flag on results, isError, that lets
+    clients and gateways distinguish failure from success. I skipped it at first and my audit
+    log counted failing calls as successes for a while. Return the friendly prose AND set the
+    flag.
+  </aside>
+</section>
+
+<!-- LESSON (PyHEP.dev): p-context -->
+<section id="p-context">
+  <p class="kicker">Lessons learned &middot; deep-dive</p>
+  <h2>Context is a bounded resource</h2>
+  <div class="content" style="gap:16px;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:22px; align-items:start;">
+      <div>
+        <p style="margin:0 0 6px 0;"><span class="tag">bad: <code>rucio_list_files("mc23...")</code>, unbounded</span></p>
+        <pre style="margin:0;"><code class="block" style="font-size:12pt; border-left-color:#a33;">mc23_13p6TeV:file_000001.root
+mc23_13p6TeV:file_000002.root
+mc23_13p6TeV:file_000003.root
+... 499,997 more lines ...</code></pre>
+        <p class="text-muted" style="font-size:11.5pt; margin:4px 0 0 0;">one call floods the LLM's entire context window, and the server downloaded all 500k names to do it</p>
+      </div>
+      <div>
+        <p style="margin:0 0 6px 0;"><span class="tag teal">good: capped, and the output says so</span></p>
+        <pre style="margin:0;"><code class="block" style="font-size:12pt; border-left-color:var(--teal);">mc23_13p6TeV:file_000001.root
+... 49 more ...
+
+---
+Showing 50 results (offset=0).
+Pass `offset=50` to see more.</code></pre>
+        <p class="text-muted" style="font-size:11.5pt; margin:4px 0 0 0;">a hard server-side limit, announced in the output, with the way to continue spelled out</p>
+      </div>
+    </div>
+    <div class="callout">
+      <p style="margin:0;">And cap the <strong>server's</strong> work too: rucio-mcp once fetched that whole 500k-file container upstream just to serve one 50-row page. Paginate the upstream iterator, not just the output.</p>
+    </div>
+  </div>
+  <div class="footnote">The real footer text and iterator fix: <a href="https://github.com/kratsg/rucio-mcp/blob/main/src/rucio_mcp/tools/_helpers.py">rucio-mcp <code>tools/_helpers.py</code></a> (<code>paginate_iter</code>).</div>
+  <aside class="notes">
+    Same bad-versus-good format. Left: what a naive file-listing tool does with a big container:
+    half a million lines into the LLM's context window, which destroys the conversation, and the
+    server fetched all of it from Rucio to boot. Right: what rucio-mcp actually returns. A hard
+    limit of fifty, enforced server side, and the two lines at the bottom matter most: the output
+    says it truncated and says exactly how to get the next page. Truncation the LLM can't see
+    silently distorts what it believes; truncation it can see is just the next tool call.
+    The callout is the second half of the lesson, and I learned it the embarrassing way: for a
+    while the output was perfectly paginated while the server still downloaded the entire
+    container upstream to serve each page. An external contributor caught it. Cap what the
+    backend does, not just what the LLM reads.
+    Same principle at the gateway: it writes its own short instructions instead of forwarding
+    every server's, and only lists the tools you're allowed to call.
   </aside>
 </section>
 
@@ -711,6 +925,48 @@ mint_ticket(claims[<span class="cmt">"sub"</span>])
     protocol was heading.
   </aside>
 </section>
+</section>
+
+<!-- OTHER TECHNICAL CONSIDERATIONS: summaries that link to the Nikhef deep-dives -->
+<section id="considerations">
+  <p class="kicker">Also on the facility's plate &middot; deep-dives linked</p>
+  <h2>Other technical <span class="accent">considerations</span></h2>
+  <div class="content" style="justify-content:center; gap:18px;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:18px;">
+      <div class="card">
+        <h3 style="font-size:17pt;"><i class="fa-solid fa-id-card card-icon" style="font-size:14pt;"></i> Client identity (CIMD)</h3>
+        <p style="font-size:15pt;">The <code>client_id</code> is a URL the server fetches: no registration database, and the facility picks which domains it trusts. Watch for SSRF.</p>
+        <p style="font-size:13pt; margin:8px 0 0 0;"><a href="https://kratsg.github.io/2026-07-01-nikhef-colloquium/#/agenda-identity">why</a> &middot; <a href="https://kratsg.github.io/2026-07-01-nikhef-colloquium/#/agenda-identity-deepdive">mechanics</a> &middot; <a href="https://kratsg.github.io/2026-07-01-nikhef-colloquium/#/agenda-identity-trace">live trace</a></p>
+      </div>
+      <div class="card teal">
+        <h3 style="font-size:17pt;"><i class="fa-solid fa-terminal card-icon" style="font-size:14pt;"></i> Shell access (ssh-oidc)</h3>
+        <p style="font-size:15pt;">Swap permanent SSH keys for short-lived federated credentials. An agent with a shell inherits minutes, not a key that lives forever.</p>
+        <p style="font-size:13pt; margin:8px 0 0 0;"><a href="https://kratsg.github.io/2026-07-01-nikhef-colloquium/#/agenda-ssh">overview</a> &middot; <a href="https://kratsg.github.io/2026-07-01-nikhef-colloquium/#/agenda-ssh-deepdive">PAM vs. SSH cert</a></p>
+      </div>
+      <div class="card">
+        <h3 style="font-size:17pt;"><i class="fa-solid fa-box card-icon" style="font-size:14pt;"></i> Sandboxing</h3>
+        <p style="font-size:15pt;">Pods, then bubblewrap off Kubernetes, then eBPF policy, then human-gated privilege. Harnesses can advise, but can't reliably hard-deny.</p>
+        <p style="font-size:13pt; margin:8px 0 0 0;"><a href="https://kratsg.github.io/2026-07-01-nikhef-colloquium/#/agenda-sandbox">overview</a> &middot; <a href="https://kratsg.github.io/2026-07-01-nikhef-colloquium/#/agenda-sandbox-policy">cgroups vs. eBPF</a></p>
+      </div>
+    </div>
+  </div>
+  <div class="footnote">Deep-dives from the Nikhef colloquium, 2026&#8209;07&#8209;01 &middot; <a href="https://github.com/EOSC-synergy/ssh-oidc">ssh-oidc</a> (KIT / EOSC-synergy) &middot; <a href="https://ebpf.io/what-is-ebpf/">ebpf.io</a></div>
+  <aside class="notes">
+    Three more things that land on the facility once agents are users, each with a deep-dive I
+    gave at Nikhef, linked here rather than repeated.
+    Client identity: with CIMD the client_id is an HTTPS URL to a metadata document the client
+    hosts, and the server fetches it. No registration endpoint to abuse and no database of
+    client ids to garbage-collect, which is why the platform moved off dynamic registration; the
+    MCP spec has since deprecated DCR in favor of it. The cost is that the server makes outbound
+    fetches, so you block private IPs and cap size and time.
+    Shell access: ssh-oidc from KIT and EOSC-synergy replaces the permanent private key with a
+    short-lived, revocable federated credential. Anything with your ssh-agent socket, including a
+    coding agent, can sign as you forever; with this, the blast radius is minutes.
+    Sandboxing: pods by default on Kubernetes, bubblewrap or similar on bare login nodes, eBPF
+    class policy for fine-grained file and syscall rules, and privilege that's earned and human
+    gated. The honest gap: today a harness can advise but can't reliably hard-deny a command at
+    the user level. Real blocking needs a policy engine on the node.
+  </aside>
 </section>
 
 <!-- OPERATIONS: AI at every layer, HTCondor daily report (Nikhef) -->
@@ -836,28 +1092,104 @@ mint_ticket(claims[<span class="cmt">"sub"</span>])
   <h2>Scored against the MCP spec <span class="accent">&middot; backup</span></h2>
   <div class="content" style="justify-content:center;">
     <table>
-      <tr><th>My choice</th><th>The spec (2026-07-28)</th><th>Verdict</th></tr>
+      <tr><th>My choice</th><th>MCP 2.0 spec (2026-07-28)</th><th>Verdict</th></tr>
       <tr><td>Stateless HTTP, state as explicit handles</td><td>protocol sessions removed</td><td>compliant / anticipated it</td></tr>
       <tr><td>CIMD instead of Dynamic Client Registration</td><td>DCR deprecated for CIMD</td><td>compliant / anticipated it</td></tr>
       <tr><td>Tools only; no sampling, roots, logging</td><td>all three deprecated</td><td>compliant / anticipated it</td></tr>
       <tr><td>Exchange tokens, audience-validate everywhere</td><td>token passthrough forbidden (MUST)</td><td>compliant</td></tr>
-      <tr><td>Markdown-only outputs, no <code>outputSchema</code></td><td>structured content recommended</td><td>wrong; retrofitting now</td></tr>
-      <tr><td>No read-only / destructive tool annotations</td><td>annotations recommended</td><td>wrong; the gateway must keep its own list of which tools write</td></tr>
+      <tr><td><code>outputSchema</code> on tools that return data</td><td>structured content recommended</td><td>compliant; fixed since PyHEP.dev</td></tr>
+      <tr><td>Read-only / destructive tool annotations</td><td>annotations recommended</td><td>compliant; fixed since PyHEP.dev</td></tr>
     </table>
   </div>
   <div class="footnote">Spec: <a href="https://modelcontextprotocol.io/specification/2026-07-28">modelcontextprotocol.io/specification/2026-07-28</a> &middot; full comparison in <a href="https://github.com/kratsg/2026-09-08-pyhepdev-mcp/blob/main/mcp-design-talk.md">mcp-design-talk.md</a> &sect;6.3.</div>
   <aside class="notes">
-    Backup scorecard, useful for the "is MCP stable enough to build on" question. Three of my
-    production-driven choices were later standardized: statelessness, client-id metadata
-    documents, and betting on tools as the durable primitive. The auth model is compliant with
-    the spec's strictest MUSTs, including the token-passthrough prohibition, which my broker
-    architecture essentially exists to satisfy.
-    And two honest misses: I returned markdown only, no output schemas and no tool annotations,
-    and the platform paid for both, a metering double-count bug and a hand-maintained read/write
-    list. The correction is authoring conventions and a retrofit. If you start tomorrow, start
-    with structured outputs.
+    Backup scorecard, for the "is MCP stable enough to build on" question. Three of my
+    production-driven choices were later standardized in the 2.0 spec: statelessness, client-id
+    metadata documents, and betting on tools as the durable primitive. The auth model is
+    compliant with the spec's strictest MUSTs, including the token-passthrough prohibition,
+    which the broker architecture essentially exists to satisfy.
+    At PyHEP.dev a few weeks ago the last two rows were misses: markdown only, no output schemas
+    and no tool annotations. Both are fixed now. Tools carry read-only and destructive
+    annotations, so the gateway no longer keeps its own list of which tools write, and the tools
+    that return data have output schemas. If you start tomorrow, start with both.
   </aside>
 </section>
+</section>
+
+<!-- WHEN IS AN MCP SERVER APPROPRIATE (PyHEP.dev) -->
+<section id="appropriate">
+  <h2>When is an MCP server appropriate?</h2>
+  <div class="content" style="gap:18px; justify-content:center;">
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:22px;">
+      <div class="card">
+        <h3><i class="fa-solid fa-check card-icon" style="font-size:15pt;"></i> Build one when</h3>
+        <ul>
+          <li>a library or service scientists already use</li>
+          <li>assistants need it repeatedly, across clients</li>
+          <li>you want to control what context the agent gets injected with</li>
+          <li>you can bound outputs and make errors recoverable</li>
+        </ul>
+      </div>
+      <div class="card teal">
+        <h3><i class="fa-solid fa-xmark card-icon" style="font-size:15pt;"></i> Skip it when</h3>
+        <ul>
+          <li>a one-off script would do</li>
+          <li>the backend's API is still churning under you</li>
+          <li>the "tool" would hand the LLM a credential</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="footnote">From &ldquo;Model Context Protocol for Scientific Software&rdquo;, PyHEP.dev 2026 &middot; <a href="https://kratsg.github.io/2026-09-07-pyhepdev-mcp/#/close-checklist">the full checklist</a></div>
+  <aside class="notes">
+    If you're thinking about putting something of yours behind MCP, here's my rule of thumb.
+    Build one when there's an existing library or service with real users, when assistants will
+    need it more than once and from more than one client, and when you can actually bound the
+    outputs and make the errors recoverable, because those are the two things the model
+    experiences directly.
+    Skip it when a script would do, when the backend has no stable contract to wrap, or when the
+    honest implementation would hand the model a credential; fix that boundary first.
+  </aside>
+</section>
+
+<!-- DISCUSSION: what we don't know yet (Nikhef) -->
+<section id="discuss">
+  <p class="kicker">Open questions for this room</p>
+  <h2>What we don&rsquo;t know <span class="accent">yet</span></h2>
+  <div class="content">
+    <div style="display:grid; grid-template-columns: repeat(3,1fr); gap:22px 30px;">
+      <div style="border-left:3px solid var(--maroon); padding-left:13px;">
+        <p style="margin:0; font-size:14.5pt;"><i class="fa-solid fa-sitemap" style="color:var(--maroon);"></i> <strong>How should facilities expose context?</strong></p>
+        <p style="font-size:12pt; margin:3px 0 0;">One MCP per service or a gateway delegating identity? Where does <em>your</em> audit live?</p></div>
+      <div style="border-left:3px solid var(--teal); padding-left:13px;">
+        <p style="margin:0; font-size:14.5pt;"><i class="fa-solid fa-map-location-dot" style="color:var(--teal);"></i> <strong>How do we share context between facilities?</strong></p>
+        <p style="font-size:12pt; margin:3px 0 0;">Shipped with the facility, or a shared commons? Single-source vs forks; eval/lint for orthogonality; who keeps it true?</p></div>
+      <div style="border-left:3px solid var(--maroon); padding-left:13px;">
+        <p style="margin:0; font-size:14.5pt;"><i class="fa-solid fa-shield-halved" style="color:var(--maroon);"></i> <strong>How do we evaluate, and secure, an autonomous operator?</strong></p>
+        <p style="font-size:12pt; margin:3px 0 0;">Human gates, k8s vs bubblewrap/eBPF isolation, credential brokering so agents never hold raw secrets, a trust ladder with an eval-harness promotion gate.</p></div>
+      <div style="border-left:3px solid var(--teal); padding-left:13px;">
+        <p style="margin:0; font-size:14.5pt;"><i class="fa-solid fa-box" style="color:var(--teal);"></i> <strong>What makes an environment truly portable?</strong></p>
+        <p style="font-size:12pt; margin:3px 0 0;">pixi-native batch as the default? Supply-chain policy for conda-forge?</p></div>
+      <div style="border-left:3px solid var(--maroon); padding-left:13px;">
+        <p style="margin:0; font-size:14.5pt;"><i class="fa-solid fa-coins" style="color:var(--maroon);"></i> <strong>Who pays for inference, and is that fair?</strong></p>
+        <p style="font-size:12pt; margin:3px 0 0;">Hosted frontier vs self-hosted open weights on facility GPUs; equity as policy.</p></div>
+      <div style="border-left:3px solid var(--teal); padding-left:13px;">
+        <p style="margin:0; font-size:14.5pt;"><i class="fa-solid fa-globe" style="color:var(--teal);"></i> <strong>What becomes standardized, across sciences?</strong></p>
+        <p style="font-size:12pt; margin:3px 0 0;">A commons spanning facilities, experiments, and sciences: where&rsquo;s the facility/experiment line?</p></div>
+    </div>
+    <p class="text-center" style="margin-top:14px; font-size:15pt;"><strong>My bet:</strong> the model and harness are the easy part. <span class="text-maroon"><strong>Context, identity, trust, and equity</strong></span> are the facility&rsquo;s homework.</p>
+  </div>
+  <aside class="notes">
+    I'll end on what I don't know, because this room runs the facilities and you'll have better
+    answers than I do. How should a facility expose context: one MCP per service, or a gateway
+    that owns identity, and where does your audit live? How do we share that context between
+    facilities instead of everyone forking it? How do we evaluate and secure an agent that acts
+    as an operator: human gates, pods versus bubblewrap and eBPF, brokering so it never holds a
+    raw secret. What makes an environment truly portable. Who pays for inference, and whether
+    that's fair. And what should become standard across sciences.
+    My bet is the one on the slide: the model and the harness are the easy part. Context,
+    identity, trust, and equity are the facility's homework.
+  </aside>
 </section>
 
 <!-- CLOSE -->
@@ -869,7 +1201,7 @@ mint_ticket(claims[<span class="cmt">"sub"</span>])
         <p>Swap the model and harness freely. The facility&rsquo;s <strong>context, identity, and credentials</strong> are what
            make it useful and safe, and that layer ports to the next facility.</p>
         <p style="margin-top:14px; font-size:14pt;"><strong>Still hard:</strong>
-           <span class="text-muted">structured outputs and read/write tool annotations (retrofitting) &middot; more brokered backends (PanDA next) &middot; testing against the live services, not mocks</span></p>
+           <span class="text-muted">more brokered backends (PanDA next) &middot; hard-deny for agents with a shell &middot; testing against the live services, not mocks</span></p>
       </div>
       <div class="callout teal">
         <p class="label">Pointers</p>
@@ -888,10 +1220,10 @@ mint_ticket(claims[<span class="cmt">"sub"</span>])
     shared facility is the layer we run: context, identity, and credentials. And that layer
     ports. The shape, a gateway, a broker, custodians next to each root secret, services added
     by config, transplants to the next facility.
-    What's still hard, honestly: I returned markdown only, no structured outputs and no
-    read/write annotations, and I'm retrofitting both. More backends behind the broker, PanDA is
-    next. And testing against the real services, because mocks never caught the failures that
-    actually bit me.
+    What's still hard, honestly: more backends behind the broker, PanDA is next. Hard-denying
+    commands for an agent that has a shell, which today needs a policy engine on the node. And
+    testing against the real services, because mocks never caught the failures that actually
+    bit me.
     The sticky-note version: design the interface for the model, design the architecture for
     the credential. Thanks, happy to take questions.
   </aside>
